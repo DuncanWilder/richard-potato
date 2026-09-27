@@ -168,6 +168,13 @@ struct AnalyticsView: View {
                     (availableWidth + columnGap) / (squareSize + columnGap)
                 )))
                 let firstVisibleWeek = weekCount - visibleWeeks
+                let firstVisibleDay = max(firstDay, calendar.date(
+                    byAdding: .day, value: firstVisibleWeek * 7, to: firstWeek
+                ) ?? firstDay)
+                let visibleSessionCounts = Array(Set(bucketByDay
+                    .filter { $0.key >= firstVisibleDay && $0.key <= lastDay }
+                    .map { $0.value.sessions }
+                    .filter { $0 > 0 })).sorted()
                 let gridWidth = CGFloat(visibleWeeks) * squareSize
                     + CGFloat(visibleWeeks - 1) * columnGap
                 let blockWidth = labelWidth + labelGap + gridWidth
@@ -193,6 +200,7 @@ struct AnalyticsView: View {
                                     firstDay: firstDay,
                                     lastDay: lastDay,
                                     buckets: bucketByDay,
+                                    visibleSessionCounts: visibleSessionCounts,
                                     calendar: calendar,
                                     squareSize: squareSize,
                                     rowGap: rowGap,
@@ -242,13 +250,14 @@ struct AnalyticsView: View {
                 Text("Less")
                 ForEach(0..<5, id: \.self) { level in
                     RoundedRectangle(cornerRadius: 2)
-                        .fill(heatmapColor(for: [0, 1, 2, 4, 7][level]))
+                        .fill(heatmapColor(level: level))
                         .frame(width: 12, height: 12)
                 }
                 Text("More")
             }
             .font(.caption2)
             .foregroundStyle(.secondary)
+            .padding(.top, 6)
         }
         .frame(maxWidth: .infinity, alignment: .topLeading)
     }
@@ -260,6 +269,7 @@ struct AnalyticsView: View {
         firstDay: Date,
         lastDay: Date,
         buckets: [Date: DayBucket],
+        visibleSessionCounts: [Int],
         calendar: Calendar,
         squareSize: CGFloat,
         rowGap: CGFloat,
@@ -285,7 +295,9 @@ struct AnalyticsView: View {
                 if day >= firstDay && day <= lastDay {
                     let sessions = buckets[day]?.sessions ?? 0
                     RoundedRectangle(cornerRadius: 2)
-                        .fill(heatmapColor(for: sessions))
+                        .fill(heatmapColor(level: heatmapLevel(
+                            for: sessions, sortedCounts: visibleSessionCounts
+                        )))
                         .frame(width: squareSize, height: squareSize)
                         .contentShape(Rectangle())
                         .onHover { inside in
@@ -299,12 +311,19 @@ struct AnalyticsView: View {
         }
     }
 
-    private func heatmapColor(for sessions: Int) -> Color {
-        switch sessions {
+    private func heatmapLevel(for sessions: Int, sortedCounts: [Int]) -> Int {
+        guard sessions > 0, let rank = sortedCounts.firstIndex(of: sessions) else { return 0 }
+        if sortedCounts.count == 1 { return 4 }
+        if sortedCounts.count == 2 { return rank == 0 ? 2 : 4 }
+        return 1 + rank * 3 / (sortedCounts.count - 1)
+    }
+
+    private func heatmapColor(level: Int) -> Color {
+        switch level {
         case 0: return .gray.opacity(0.2)
         case 1: return .green.opacity(0.35)
-        case 2...3: return .green.opacity(0.55)
-        case 4...6: return .green.opacity(0.75)
+        case 2: return .green.opacity(0.55)
+        case 3: return .green.opacity(0.75)
         default: return .green
         }
     }
