@@ -26,7 +26,7 @@ struct AnalyticsView: View {
     }
 
     var body: some View {
-        VStack(spacing: 0) {
+        ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 activityHeatmap
 
@@ -38,51 +38,42 @@ struct AnalyticsView: View {
                 .pickerStyle(.segmented)
                 .labelsHidden()
                 .frame(maxWidth: .infinity)
-            }
-            .padding(.horizontal, 20)
-            .padding(.top, 20)
 
-            ScrollView {
-                VStack(alignment: .leading, spacing: 16) {
-                    Text("Analytics for \(periodTitle)")
-                        .font(.headline)
+                Text("Analytics for \(periodTitle)")
+                    .font(.headline)
 
-                    totalsRow
+                totalsRow
 
-                    Picker("Breakdown", selection: $chartMode) {
-                        ForEach(ChartMode.allCases) { mode in
-                            Text(mode.title).tag(mode)
-                        }
-                    }
-                    .pickerStyle(.segmented)
-                    .labelsHidden()
-
-                    chart
-                        .frame(height: 220)
-
-                    if chartMode == .hour, let busiest = analytics.busiestHour(range: range) {
-                        Text("Busiest hour: \(busiest.label)")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
+                Picker("Breakdown", selection: $chartMode) {
+                    ForEach(ChartMode.allCases) { mode in
+                        Text(mode.title).tag(mode)
                     }
                 }
-                .padding(.horizontal, 20)
-                .padding(.vertical, 16)
-                .frame(maxWidth: .infinity, alignment: .leading)
-            }
+                .pickerStyle(.segmented)
+                .labelsHidden()
 
-            HStack {
-                Text("Stored on this Mac only. No transcripts.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                Spacer()
-                Button("Reset stats…") {
-                    confirmReset = true
+                chart
+                    .frame(height: 220)
+
+                if chartMode == .hour, let busiest = analytics.busiestHour(range: range) {
+                    Text("Busiest hour: \(busiest.label)")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
                 }
-                .disabled(analytics.events.isEmpty)
+
+                HStack {
+                    Text("Stored on this Mac only. No transcripts.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                    Button("Reset stats…") {
+                        confirmReset = true
+                    }
+                    .disabled(analytics.events.isEmpty)
+                }
             }
-            .padding(.horizontal, 20)
-            .padding(.vertical, 12)
+            .padding(20)
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
         .frame(minWidth: 520, minHeight: 420)
         .onChange(of: range) { _, _ in
@@ -164,10 +155,12 @@ struct AnalyticsView: View {
         let rowGap: CGFloat = 3
         let headerHeight: CGFloat = 16
         let squareSize: CGFloat = 12
+        let gridHeight = headerHeight + 7 * squareSize + 6 * rowGap
 
-        return VStack(alignment: .leading, spacing: 12) {
+        return VStack(alignment: .leading, spacing: 0) {
             Text("Sessions per day")
                 .font(.subheadline.weight(.semibold))
+                .padding(.bottom, 8)
 
             GeometryReader { geometry in
                 let availableWidth = geometry.size.width - labelWidth - labelGap
@@ -179,8 +172,6 @@ struct AnalyticsView: View {
                     + CGFloat(visibleWeeks - 1) * columnGap
                 let blockWidth = labelWidth + labelGap + gridWidth
                 let blockX = max(0, geometry.size.width - blockWidth)
-                let gridHeight = headerHeight + 7 * squareSize + 6 * rowGap
-
                 ZStack(alignment: .topLeading) {
                     HStack(alignment: .top, spacing: labelGap) {
                         VStack(spacing: rowGap) {
@@ -222,6 +213,12 @@ struct AnalyticsView: View {
                         let squareX = blockX + labelWidth + labelGap
                             + CGFloat(week - firstVisibleWeek) * (squareSize + columnGap)
                             + squareSize / 2
+                        let row = dayOffset % 7
+                        let squareY = headerHeight + CGFloat(row) * (squareSize + rowGap)
+                            + squareSize / 2
+                        let tooltipY = row <= 2
+                            ? min(gridHeight - 31, squareY + 37)
+                            : max(31, squareY - 37)
                         hoverTooltip(
                             title: hoveredActivityDay.formatted(date: .abbreviated, time: .omitted),
                             sessions: bucket?.sessions ?? 0,
@@ -231,14 +228,14 @@ struct AnalyticsView: View {
                         )
                         .position(
                             x: clampedTooltipX(squareX, width: 190, in: geometry.size.width),
-                            y: min(gridHeight + 34, geometry.size.height - 34)
+                            y: tooltipY
                         )
                         .allowsHitTesting(false)
                     }
                 }
                 .frame(width: geometry.size.width, height: geometry.size.height, alignment: .topLeading)
             }
-            .frame(height: 190)
+            .frame(height: gridHeight)
 
             HStack(spacing: 4) {
                 Spacer()

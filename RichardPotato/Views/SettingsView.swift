@@ -62,7 +62,10 @@ struct SettingsView: View {
 
                 ForEach(controller.store.corrections) { correction in
                     HStack(spacing: 8) {
-                        LeftAlignedTextField(text: correctionBinding(correction.id, keyPath: \.heard))
+                        TextField("", text: correctionBinding(correction.id, keyPath: \.heard))
+                            .textFieldStyle(.plain)
+                            .multilineTextAlignment(.leading)
+                            .multilineTextAlignment(strategy: .layoutBased)
                             .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
                             .padding(.horizontal, 6)
                             .padding(.vertical, 4)
@@ -72,7 +75,10 @@ struct SettingsView: View {
                         Image(systemName: "arrow.right")
                             .frame(width: 16)
                             .foregroundStyle(.secondary)
-                        LeftAlignedTextField(text: correctionBinding(correction.id, keyPath: \.written))
+                        TextField("", text: correctionBinding(correction.id, keyPath: \.written))
+                            .textFieldStyle(.plain)
+                            .multilineTextAlignment(.leading)
+                            .multilineTextAlignment(strategy: .layoutBased)
                             .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
                             .padding(.horizontal, 6)
                             .padding(.vertical, 4)
@@ -168,43 +174,5 @@ struct SettingsView: View {
                 controller.store.save()
             }
         )
-    }
-}
-
-private struct LeftAlignedTextField: NSViewRepresentable {
-    @Binding var text: String
-
-    func makeNSView(context: Context) -> NSTextField {
-        let field = NSTextField()
-        field.isBezeled = false
-        field.drawsBackground = false
-        field.alignment = .left
-        field.delegate = context.coordinator
-        field.setContentHuggingPriority(.defaultLow, for: .horizontal)
-        return field
-    }
-
-    func updateNSView(_ field: NSTextField, context: Context) {
-        if field.stringValue != text {
-            field.stringValue = text
-        }
-        field.alignment = .left
-    }
-
-    func makeCoordinator() -> Coordinator {
-        Coordinator(text: $text)
-    }
-
-    final class Coordinator: NSObject, NSTextFieldDelegate {
-        var text: Binding<String>
-
-        init(text: Binding<String>) {
-            self.text = text
-        }
-
-        func controlTextDidChange(_ notification: Notification) {
-            guard let field = notification.object as? NSTextField else { return }
-            text.wrappedValue = field.stringValue
-        }
     }
 }
