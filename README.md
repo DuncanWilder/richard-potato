@@ -1,3 +1,5 @@
+<img src="RichardPotato/Assets.xcassets/AppIcon.appiconset/icon-512.png" alt="Richard Potato app icon" width="200">
+
 # Richard Potato
 
 Richard Potato is a macOS menu bar app for dictation into the active app. It uses Apple's on-device speech model. It makes no app network requests. The speech model may need a download during setup.
