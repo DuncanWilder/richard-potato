@@ -168,8 +168,7 @@ final class AppController: ObservableObject {
             case .paste:
                 if store.postProcessTranscript && !text.isEmpty {
                     let refined = await TranscriptRefiner.refine(text)
-                    let output = "Original transcript:\n\(text)\n\nRefined transcript:\n\(refined)"
-                    TextInserter.insert(output, using: .paste)
+                    TextInserter.insert(refined, using: .paste)
                 } else {
                     TextInserter.insert(text, using: .paste)
                 }

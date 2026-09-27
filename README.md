@@ -15,6 +15,8 @@ Run `./scripts/setup-signing.sh` once to create a local code-signing certificate
 ./scripts/release.sh  # Build an app and zip in dist/
 ```
 
+To publish a test release, commit and push your changes, then run `./scripts/github-release.sh`. It asks for release notes and uploads the zip to a GitHub prerelease tagged with the project version.
+
 The build scheme signs Debug and Release apps with the same certificate so macOS can retain their permission grants. A release from this local certificate is not Apple notarized. Recipients may need to right-click the app and select **Open** on first use.
 
 ## Use
