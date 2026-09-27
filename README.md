@@ -4,6 +4,20 @@
 
 Richard Potato is a macOS menu bar app for dictation into the active app. It uses Apple's on-device speech model. It makes no app network requests. The speech model may need a download during setup.
 
+## Screenshots
+
+**Settings**
+
+<img src="screenshots/settings-screen.png" alt="Richard Potato settings" width="480">
+
+**Analytics**
+
+<img src="screenshots/analytics-screen.png" alt="Richard Potato analytics" width="480">
+
+**Dictation bar**
+
+<img src="screenshots/speech-indicator.png" alt="Dictation bar while listening" width="208">
+
 ## Build and run
 
 Requires macOS 26 or later and Xcode 27 or later.
