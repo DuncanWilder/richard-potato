@@ -362,7 +362,7 @@ struct AnalyticsView: View {
                                     in: geometry,
                                     proxy: proxy,
                                     buckets: buckets,
-                                    x: { $0.day },
+                                    x: { dayMidpoint($0.day) },
                                     value: { Double($0.sessions) }
                                 )?.day
                             case .ended:
@@ -372,7 +372,7 @@ struct AnalyticsView: View {
 
                     if let bucket = buckets.first(where: { $0.day == hoveredDay }),
                        let plotFrame = proxy.plotFrame,
-                       let x = proxy.position(forX: bucket.day),
+                       let x = proxy.position(forX: dayMidpoint(bucket.day)),
                        let y = proxy.position(forY: Double(bucket.sessions)) {
                         let plot = geometry[plotFrame]
                         hoverTooltip(
@@ -495,6 +495,11 @@ struct AnalyticsView: View {
 
     private func clampedTooltipX(_ x: CGFloat, width: CGFloat, in chartWidth: CGFloat) -> CGFloat {
         min(max(x, width / 2), chartWidth - width / 2)
+    }
+
+    private func dayMidpoint(_ day: Date) -> Date {
+        guard let interval = Calendar.current.dateInterval(of: .day, for: day) else { return day }
+        return interval.start.addingTimeInterval(interval.duration / 2)
     }
 
     private func hoveredBar<Bucket, X: Plottable>(
