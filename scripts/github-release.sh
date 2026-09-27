@@ -75,5 +75,4 @@ echo "Creating GitHub release $tag..."
 gh release create "$tag" "$archive" \
   --target "$commit" \
   --title "Richard Potato $tag" \
-  --notes-file "$notes" \
-  --prerelease
+  --notes-file "$notes"
