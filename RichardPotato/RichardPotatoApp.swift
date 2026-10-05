@@ -23,7 +23,7 @@ struct RichardPotatoApp: App {
             .keyboardShortcut(",", modifiers: .command)
 
             Button("Analytics…") {
-                AnalyticsWindowController.shared.show(controller: controller)
+                SettingsWindowController.shared.show(controller: controller, page: .analytics)
             }
 
             Button("Quit Richard Potato") {

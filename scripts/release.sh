@@ -34,6 +34,7 @@ echo "Building ${SCHEME} (${CONFIG}) v${version}..."
 xcodebuild \
   -scheme "$SCHEME" \
   -configuration "$CONFIG" \
+  -destination 'generic/platform=macOS' \
   -derivedDataPath "$DERIVED_DATA" \
   "${SIGN_BUILD_SETTINGS[@]}" \
   -quiet \

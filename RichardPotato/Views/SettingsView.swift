@@ -1,14 +1,29 @@
 import AppKit
+import ServiceManagement
 import SwiftUI
 
 struct SettingsView: View {
     @EnvironmentObject private var controller: AppController
+    @Environment(\.scenePhase) private var scenePhase
+    @State private var loginItemStatus = SMAppService.mainApp.status
+    @State private var loginItemError: String?
 
     private static let systemDefaultTag = "system-default"
 
     var body: some View {
         Form {
-            Section("Settings") {
+            Section {
+                Toggle("Open at login", isOn: openAtLoginBinding)
+
+                if loginItemStatus == .requiresApproval {
+                    Text("Allow Richard Potato in System Settings to open it at login.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Button("Open Login Items Settings…") {
+                        SMAppService.openSystemSettingsLoginItems()
+                    }
+                }
+
                 HStack {
                     Text("Shortcut")
                     Spacer()
@@ -44,8 +59,109 @@ struct SettingsView: View {
 
                 Toggle("Show dictation bar", isOn: indicatorBinding)
             }
+        }
+        .formStyle(.grouped)
+        .toggleStyle(.switch)
+        .scrollDisabled(true)
+        .padding(.horizontal, 8)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .onAppear {
+            controller.refreshPermissions()
+            loginItemStatus = SMAppService.mainApp.status
+        }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active {
+                loginItemStatus = SMAppService.mainApp.status
+            }
+        }
+        .alert("Could not change Open at login", isPresented: Binding(
+            get: { loginItemError != nil },
+            set: { if !$0 { loginItemError = nil } }
+        )) {
+            Button("OK", role: .cancel) { loginItemError = nil }
+        } message: {
+            Text(loginItemError ?? "")
+        }
+        .onDisappear {
+            controller.store.isRecording = false
+        }
+        .onExitCommand {
+            controller.store.isRecording = false
+        }
+    }
 
-            Section("Custom corrections") {
+    private var openAtLoginBinding: Binding<Bool> {
+        Binding(
+            get: { loginItemStatus == .enabled || loginItemStatus == .requiresApproval },
+            set: { enabled in
+                let service = SMAppService.mainApp
+                do {
+                    if enabled {
+                        try service.register()
+                    } else {
+                        try service.unregister()
+                    }
+                } catch {
+                    loginItemError = error.localizedDescription
+                }
+                loginItemStatus = service.status
+            }
+        )
+    }
+
+    private var activationBinding: Binding<ActivationMode> {
+        Binding(
+            get: { controller.store.activationMode },
+            set: { mode in
+                controller.store.activationMode = mode
+                controller.store.save()
+            }
+        )
+    }
+
+    private var insertionBinding: Binding<InsertionMethod> {
+        Binding(
+            get: { controller.store.insertionMethod },
+            set: { method in
+                controller.store.insertionMethod = method
+                controller.store.save()
+            }
+        )
+    }
+
+    private var microphoneBinding: Binding<String> {
+        Binding(
+            get: { controller.store.microphoneUID ?? Self.systemDefaultTag },
+            set: { uid in
+                controller.selectMicrophone(uid: uid == Self.systemDefaultTag ? nil : uid)
+            }
+        )
+    }
+
+    private var postProcessBinding: Binding<Bool> {
+        Binding(
+            get: { controller.store.postProcessTranscript },
+            set: { enabled in
+                controller.store.postProcessTranscript = enabled
+                controller.store.save()
+            }
+        )
+    }
+
+    private var indicatorBinding: Binding<Bool> {
+        Binding(
+            get: { controller.store.showListeningIndicator },
+            set: { controller.setListeningIndicatorVisible($0) }
+        )
+    }
+}
+
+struct CustomCorrectionsView: View {
+    @EnvironmentObject private var controller: AppController
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 12) {
                 if !controller.store.corrections.isEmpty {
                     HStack(spacing: 8) {
                         Text("Heard phrase")
@@ -107,62 +223,7 @@ struct SettingsView: View {
                 }
             }
         }
-        .formStyle(.grouped)
-        .onAppear {
-            controller.refreshPermissions()
-        }
-        .onDisappear {
-            controller.store.isRecording = false
-        }
-        .onExitCommand {
-            controller.store.isRecording = false
-        }
-    }
-
-    private var activationBinding: Binding<ActivationMode> {
-        Binding(
-            get: { controller.store.activationMode },
-            set: { mode in
-                controller.store.activationMode = mode
-                controller.store.save()
-            }
-        )
-    }
-
-    private var insertionBinding: Binding<InsertionMethod> {
-        Binding(
-            get: { controller.store.insertionMethod },
-            set: { method in
-                controller.store.insertionMethod = method
-                controller.store.save()
-            }
-        )
-    }
-
-    private var microphoneBinding: Binding<String> {
-        Binding(
-            get: { controller.store.microphoneUID ?? Self.systemDefaultTag },
-            set: { uid in
-                controller.selectMicrophone(uid: uid == Self.systemDefaultTag ? nil : uid)
-            }
-        )
-    }
-
-    private var postProcessBinding: Binding<Bool> {
-        Binding(
-            get: { controller.store.postProcessTranscript },
-            set: { enabled in
-                controller.store.postProcessTranscript = enabled
-                controller.store.save()
-            }
-        )
-    }
-
-    private var indicatorBinding: Binding<Bool> {
-        Binding(
-            get: { controller.store.showListeningIndicator },
-            set: { controller.setListeningIndicatorVisible($0) }
-        )
+        .padding(28)
     }
 
     private func correctionBinding(_ id: UUID, keyPath: WritableKeyPath<TextCorrection, String>) -> Binding<String> {

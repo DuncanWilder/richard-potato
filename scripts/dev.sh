@@ -39,6 +39,7 @@ echo "Building ${SCHEME} (${CONFIG})..."
 xcodebuild \
   -scheme "$SCHEME" \
   -configuration "$CONFIG" \
+  -destination 'generic/platform=macOS' \
   -derivedDataPath "$DERIVED_DATA" \
   -quiet \
   build 2>&1 | sed '/^error: the following command failed with exit code 0 but produced no further output$/d'

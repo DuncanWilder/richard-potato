@@ -72,10 +72,12 @@ struct AnalyticsView: View {
                     .disabled(analytics.events.isEmpty)
                 }
             }
-            .padding(20)
+            .frame(maxWidth: 720, alignment: .leading)
+            .padding(.horizontal, 28)
+            .padding(.vertical, 20)
             .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .frame(minWidth: 520, minHeight: 420)
+        .frame(minHeight: 420)
         .onChange(of: range) { _, _ in
             hoveredDay = nil
             hoveredHour = nil
