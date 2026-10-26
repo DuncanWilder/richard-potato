@@ -11,6 +11,5 @@ for script in scripts/*.sh; do
   esac
 done
 plutil -lint Resources/Info.plist
-xcrun swift build --sdk "$SDKROOT" --configuration debug
 xcrun swift build --sdk "$SDKROOT" --configuration release
-./scripts/test.sh "$@"
+./scripts/test.sh --configuration release "$@"
