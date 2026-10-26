@@ -10,7 +10,14 @@ let package = Package(
             name: "RichardPotato",
             path: "RichardPotato",
             exclude: ["Assets.xcassets", "RichardPotato.entitlements"],
-            swiftSettings: [.swiftLanguageMode(.v5)]
+            swiftSettings: [
+                .swiftLanguageMode(.v5),
+                .unsafeFlags(["-Osize"], .when(configuration: .release)),
+            ],
+            // Keep Swift's link driver on the same Release optimization setting.
+            linkerSettings: [
+                .unsafeFlags(["-Osize"], .when(configuration: .release))
+            ]
         ),
         .testTarget(
             name: "RichardPotatoTests",

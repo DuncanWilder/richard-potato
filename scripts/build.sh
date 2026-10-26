@@ -17,6 +17,10 @@ mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 # Replace the executable with a new file so macOS discards cached signature data.
 STAGED_BIN="$(mktemp "$APP/Contents/MacOS/.RichardPotato.XXXXXX")"
 cp -p "$BIN_DIR/RichardPotato" "$STAGED_BIN"
+if [[ "$CONFIG" == release ]]; then
+  # Keep the build product for debugging. Strip only the packaged copy before signing.
+  xcrun strip -S -x "$STAGED_BIN"
+fi
 mv -f "$STAGED_BIN" "$APP/Contents/MacOS/RichardPotato"
 cp "$ROOT/Resources/Info.plist" "$APP/Contents/Info.plist"
 
@@ -33,6 +37,9 @@ for icon in "$ROOT"/RichardPotato/Assets.xcassets/AppIcon.appiconset/*.png; do
   cp "$icon" "$ICON_DIR/$name"
 done
 iconutil -c icns "$ICON_DIR" -o "$APP/Contents/Resources/AppIcon.icns"
+python3 "$ROOT/scripts/preserve-icon-pngs.py" \
+  "$APP/Contents/Resources/AppIcon.icns" \
+  "$ROOT/RichardPotato/Assets.xcassets/AppIcon.appiconset"
 
 # Preserve the same identity and permissions for dev and release builds.
 "$ROOT/scripts/stabilize-signature.sh" "$APP"
