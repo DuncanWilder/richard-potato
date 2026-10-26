@@ -23,7 +23,7 @@ Use the scripts in `./scripts/` for local app checks and release builds:
 
 Read these scripts before a build or a runtime check. Use the Swift command-line tools and the macOS SDK. A full Xcode installation is not required.
 
-CI runs on macOS 26 and checks Debug and Release compilation, Swift Testing, formatting, shell syntax, and app metadata. It does not package or sign an app.
+CI runs on macOS 26 and checks Release compilation, Release Swift Testing, formatting, shell syntax, and app metadata. It does not build Debug, package, or sign an app.
 
 - `./scripts/check.sh` runs all CI checks locally without opening or signing the app.
 - `./scripts/test.sh` runs Swift Testing without the XCTest runner. Add `--filter` to select tests.
