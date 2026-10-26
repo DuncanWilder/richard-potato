@@ -25,6 +25,10 @@ Richard Potato supports
 
 <img src="screenshots/settings-screen.png" alt="Richard Potato settings" width="480">
 
+**Custom corrections**
+
+<img src="screenshots/corrections-screen.png" alt="Richard Potato custom corrections" width="480">
+
 **Analytics**
 
 <img src="screenshots/analytics-screen.png" alt="Richard Potato analytics" width="480">
