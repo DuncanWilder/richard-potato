@@ -177,14 +177,16 @@ final class DictationEngine: ObservableObject {
         if audioFormatsMatch(naturalFormat, analysisFormat) {
             converter = nil
         } else {
-            converter = AudioBufferConverter(inputFormat: naturalFormat, outputFormat: analysisFormat)
+            converter = AudioBufferConverter(
+                inputFormat: naturalFormat, outputFormat: analysisFormat)
             guard converter != nil else {
                 lastError = DictationEngineError.converterFailed.localizedDescription
                 return
             }
         }
 
-        input.installTap(onBus: 0, bufferSize: 512, format: naturalFormat) { [weak self] buffer, _ in
+        input.installTap(onBus: 0, bufferSize: 512, format: naturalFormat) {
+            [weak self] buffer, _ in
             let now = CFAbsoluteTimeGetCurrent()
             if now - lastLevelUpdate >= 1.0 / 15.0 {
                 lastLevelUpdate = now
@@ -211,7 +213,8 @@ final class DictationEngine: ObservableObject {
         self.engine = engine
         isListening = true
         let elapsed = (CFAbsoluteTimeGetCurrent() - started) * 1000
-        Log.dictation.info("Microphone opened in \(elapsed, format: .fixed(precision: 1), privacy: .public)ms")
+        Log.dictation.info(
+            "Microphone opened in \(elapsed, format: .fixed(precision: 1), privacy: .public)ms")
     }
 
     /// Releases the microphone so the system indicator clears between dictations.
@@ -293,9 +296,11 @@ final class DictationEngine: ObservableObject {
         teardown()
 
         let transcriber = SpeechTranscriber(locale: locale, preset: .progressiveTranscription)
-        guard let analysisFormat = await SpeechAnalyzer.bestAvailableAudioFormat(
-            compatibleWith: [transcriber]
-        ) else {
+        guard
+            let analysisFormat = await SpeechAnalyzer.bestAvailableAudioFormat(
+                compatibleWith: [transcriber]
+            )
+        else {
             throw DictationEngineError.analyzerFormatUnavailable
         }
 
@@ -378,7 +383,9 @@ final class DictationEngine: ObservableObject {
         case .installed:
             _ = try? await AssetInventory.reserve(locale: locale)
         case .supported, .downloading:
-            if let request = try await AssetInventory.assetInstallationRequest(supporting: [transcriber]) {
+            if let request = try await AssetInventory.assetInstallationRequest(supporting: [
+                transcriber
+            ]) {
                 status = "Installing on-device speech model…"
                 try await request.downloadAndInstall()
                 _ = try? await AssetInventory.reserve(locale: locale)

@@ -4,7 +4,7 @@ Use ASD-STE100 Simplified Technical English when you communicate with the user.
 
 ## Project
 
-Richard Potato is a SwiftUI macOS menu bar app. It uses Apple's Speech framework for dictation. The Swift package has one executable target and no test target. The minimum macOS version is 26.0.
+Richard Potato is a SwiftUI macOS menu bar app. It uses Apple's Speech framework for dictation. The Swift package has one executable target and a Swift Testing target. The minimum macOS version is 26.0.
 
 - `RichardPotato/RichardPotatoApp.swift` defines the menu bar UI.
 - `RichardPotato/AppController.swift` controls the shortcut, capture, and text output.
@@ -18,10 +18,19 @@ Richard Potato is a SwiftUI macOS menu bar app. It uses Apple's Speech framework
 
 Use the scripts in `./scripts/` for local app checks and release builds:
 
-- `./scripts/dev.sh` builds and signs Debug, stops the running app, and opens the new build. Use it when a fix needs a check in the running app, such as an idle CPU measurement.
+- `./scripts/dev.sh` stops the running app, builds and signs Debug, and opens the new build. Use it when a fix needs a check in the running app, such as an idle CPU measurement.
 - `./scripts/release.sh` builds Release, replaces `dist/`, signs the app, creates a versioned ZIP, and opens `dist/`. Use it to prepare a release.
 
 Read these scripts before a build or a runtime check. Use the Swift command-line tools and the macOS SDK. A full Xcode installation is not required.
+
+CI runs on macOS 26 and checks Debug and Release compilation, Swift Testing, formatting, shell syntax, and app metadata. It does not package or sign an app.
+
+- `./scripts/check.sh` runs all CI checks locally without opening or signing the app.
+- `./scripts/test.sh` runs Swift Testing without the XCTest runner. Add `--filter` to select tests.
+- `./scripts/format.sh` checks Swift formatting. Use `./scripts/format.sh fix` to apply it.
+- `.swift-format` sets four-space indentation, as in BlueSquare.
+- `scripts/toolchain.sh` selects an installed macOS 26 SDK when available. Set `SDKROOT` to select another SDK.
+- Add tests for deterministic logic in `RichardPotatoTests/`. Automated tests do not check microphone access, Accessibility access, or speech model installation.
 
 To check compilation without opening the app or signing a bundle, run:
 

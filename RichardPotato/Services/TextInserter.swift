@@ -50,8 +50,11 @@ enum TextInserter {
 
     private static func postPasteShortcut() {
         let source = CGEventSource(stateID: .combinedSessionState)
-        guard let down = CGEvent(keyboardEventSource: source, virtualKey: pasteKeyCode, keyDown: true),
-              let up = CGEvent(keyboardEventSource: source, virtualKey: pasteKeyCode, keyDown: false) else {
+        guard
+            let down = CGEvent(
+                keyboardEventSource: source, virtualKey: pasteKeyCode, keyDown: true),
+            let up = CGEvent(keyboardEventSource: source, virtualKey: pasteKeyCode, keyDown: false)
+        else {
             return
         }
 
@@ -66,7 +69,9 @@ enum TextInserter {
         up.post(tap: .cgAnnotatedSessionEventTap)
     }
 
-    private static func snapshot(_ pasteboard: NSPasteboard) -> [[NSPasteboard.PasteboardType: Data]] {
+    private static func snapshot(_ pasteboard: NSPasteboard) -> [[NSPasteboard.PasteboardType:
+        Data]]
+    {
         (pasteboard.pasteboardItems ?? []).map { item in
             var contents: [NSPasteboard.PasteboardType: Data] = [:]
             for type in item.types {
@@ -103,8 +108,12 @@ enum TextInserter {
         guard count > 0 else { return }
         let source = CGEventSource(stateID: .hidSystemState)
         for _ in 0..<count {
-            guard let down = CGEvent(keyboardEventSource: source, virtualKey: deleteKeyCode, keyDown: true),
-                  let up = CGEvent(keyboardEventSource: source, virtualKey: deleteKeyCode, keyDown: false) else {
+            guard
+                let down = CGEvent(
+                    keyboardEventSource: source, virtualKey: deleteKeyCode, keyDown: true),
+                let up = CGEvent(
+                    keyboardEventSource: source, virtualKey: deleteKeyCode, keyDown: false)
+            else {
                 return
             }
             for event in [down, up] {
@@ -132,7 +141,8 @@ enum TextInserter {
     }
 
     private static func post(_ units: [UniChar], source: CGEventSource?, keyDown: Bool) {
-        guard let event = CGEvent(keyboardEventSource: source, virtualKey: 0, keyDown: keyDown) else { return }
+        guard let event = CGEvent(keyboardEventSource: source, virtualKey: 0, keyDown: keyDown)
+        else { return }
         units.withUnsafeBufferPointer { buffer in
             if let base = buffer.baseAddress {
                 event.keyboardSetUnicodeString(stringLength: units.count, unicodeString: base)

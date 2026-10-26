@@ -92,7 +92,9 @@ struct AnalyticsView: View {
             }
             Button("Cancel", role: .cancel) {}
         } message: {
-            Text("This clears local session counts, word totals, and voice time. It cannot be undone.")
+            Text(
+                "This clears local session counts, word totals, and voice time. It cannot be undone."
+            )
         }
     }
 
@@ -147,9 +149,10 @@ struct AnalyticsView: View {
         let firstWeek = calendar.dateInterval(of: .weekOfYear, for: firstDay)?.start ?? firstDay
         let dayCount = calendar.dateComponents([.day], from: firstWeek, to: lastDay).day ?? 0
         let weekCount = max(1, dayCount / 7 + 1)
-        let bucketByDay = Dictionary(uniqueKeysWithValues: analytics.dayBuckets(range: .all)
-            .filter { $0.day >= firstDay && $0.day <= lastDay }
-            .map { ($0.day, $0) })
+        let bucketByDay = Dictionary(
+            uniqueKeysWithValues: analytics.dayBuckets(range: .all)
+                .filter { $0.day >= firstDay && $0.day <= lastDay }
+                .map { ($0.day, $0) })
         let weekdayLabels = calendar.veryShortStandaloneWeekdaySymbols
         let labelWidth: CGFloat = 14
         let labelGap: CGFloat = 6
@@ -166,18 +169,28 @@ struct AnalyticsView: View {
 
             GeometryReader { geometry in
                 let availableWidth = geometry.size.width - labelWidth - labelGap
-                let visibleWeeks = min(weekCount, max(1, Int(
-                    (availableWidth + columnGap) / (squareSize + columnGap)
-                )))
+                let visibleWeeks = min(
+                    weekCount,
+                    max(
+                        1,
+                        Int(
+                            (availableWidth + columnGap) / (squareSize + columnGap)
+                        )))
                 let firstVisibleWeek = weekCount - visibleWeeks
-                let firstVisibleDay = max(firstDay, calendar.date(
-                    byAdding: .day, value: firstVisibleWeek * 7, to: firstWeek
-                ) ?? firstDay)
-                let visibleSessionCounts = Array(Set(bucketByDay
-                    .filter { $0.key >= firstVisibleDay && $0.key <= lastDay }
-                    .map { $0.value.sessions }
-                    .filter { $0 > 0 })).sorted()
-                let gridWidth = CGFloat(visibleWeeks) * squareSize
+                let firstVisibleDay = max(
+                    firstDay,
+                    calendar.date(
+                        byAdding: .day, value: firstVisibleWeek * 7, to: firstWeek
+                    ) ?? firstDay)
+                let visibleSessionCounts = Array(
+                    Set(
+                        bucketByDay
+                            .filter { $0.key >= firstVisibleDay && $0.key <= lastDay }
+                            .map { $0.value.sessions }
+                            .filter { $0 > 0 })
+                ).sorted()
+                let gridWidth =
+                    CGFloat(visibleWeeks) * squareSize
                     + CGFloat(visibleWeeks - 1) * columnGap
                 let blockWidth = labelWidth + labelGap + gridWidth
                 let blockX = max(0, geometry.size.width - blockWidth)
@@ -214,19 +227,23 @@ struct AnalyticsView: View {
                     .offset(x: blockX)
 
                     if let hoveredActivityDay,
-                       let dayOffset = calendar.dateComponents(
-                           [.day], from: firstWeek, to: hoveredActivityDay
-                       ).day, dayOffset >= 0,
-                       dayOffset / 7 >= firstVisibleWeek {
+                        let dayOffset = calendar.dateComponents(
+                            [.day], from: firstWeek, to: hoveredActivityDay
+                        ).day, dayOffset >= 0,
+                        dayOffset / 7 >= firstVisibleWeek
+                    {
                         let bucket = bucketByDay[hoveredActivityDay]
                         let week = dayOffset / 7
-                        let squareX = blockX + labelWidth + labelGap
+                        let squareX =
+                            blockX + labelWidth + labelGap
                             + CGFloat(week - firstVisibleWeek) * (squareSize + columnGap)
                             + squareSize / 2
                         let row = dayOffset % 7
-                        let squareY = headerHeight + CGFloat(row) * (squareSize + rowGap)
+                        let squareY =
+                            headerHeight + CGFloat(row) * (squareSize + rowGap)
                             + squareSize / 2
-                        let tooltipY = row <= 2
+                        let tooltipY =
+                            row <= 2
                             ? min(gridHeight - 31, squareY + 37)
                             : max(31, squareY - 37)
                         hoverTooltip(
@@ -243,7 +260,9 @@ struct AnalyticsView: View {
                         .allowsHitTesting(false)
                     }
                 }
-                .frame(width: geometry.size.width, height: geometry.size.height, alignment: .topLeading)
+                .frame(
+                    width: geometry.size.width, height: geometry.size.height, alignment: .topLeading
+                )
             }
             .frame(height: gridHeight)
 
@@ -280,9 +299,10 @@ struct AnalyticsView: View {
         let days = (0..<7).compactMap { day in
             calendar.date(byAdding: .day, value: week * 7 + day, to: firstWeek)
         }
-        let monthStart = days.first(where: {
-            $0 >= firstDay && $0 <= lastDay && calendar.component(.day, from: $0) == 1
-        })
+        let monthStart =
+            days.first(where: {
+                $0 >= firstDay && $0 <= lastDay && calendar.component(.day, from: $0) == 1
+            })
             ?? (week == firstVisibleWeek ? days.first(where: { $0 >= firstDay }) : nil)
 
         return VStack(spacing: rowGap) {
@@ -297,15 +317,20 @@ struct AnalyticsView: View {
                 if day >= firstDay && day <= lastDay {
                     let sessions = buckets[day]?.sessions ?? 0
                     RoundedRectangle(cornerRadius: 2)
-                        .fill(heatmapColor(level: heatmapLevel(
-                            for: sessions, sortedCounts: visibleSessionCounts
-                        )))
+                        .fill(
+                            heatmapColor(
+                                level: heatmapLevel(
+                                    for: sessions, sortedCounts: visibleSessionCounts
+                                ))
+                        )
                         .frame(width: squareSize, height: squareSize)
                         .contentShape(Rectangle())
                         .onHover { inside in
                             hoveredActivityDay = inside ? day : nil
                         }
-                        .accessibilityLabel("\(day.formatted(date: .complete, time: .omitted)), \(sessions) \(sessions == 1 ? "session" : "sessions")")
+                        .accessibilityLabel(
+                            "\(day.formatted(date: .complete, time: .omitted)), \(sessions) \(sessions == 1 ? "session" : "sessions")"
+                        )
                 } else {
                     Color.clear.frame(width: squareSize, height: squareSize)
                 }
@@ -359,23 +384,25 @@ struct AnalyticsView: View {
                         .onContinuousHover { phase in
                             switch phase {
                             case .active(let point):
-                                hoveredDay = hoveredBar(
-                                    at: point,
-                                    in: geometry,
-                                    proxy: proxy,
-                                    buckets: buckets,
-                                    x: { dayMidpoint($0.day) },
-                                    value: { Double($0.sessions) }
-                                )?.day
+                                hoveredDay =
+                                    hoveredBar(
+                                        at: point,
+                                        in: geometry,
+                                        proxy: proxy,
+                                        buckets: buckets,
+                                        x: { dayMidpoint($0.day) },
+                                        value: { Double($0.sessions) }
+                                    )?.day
                             case .ended:
                                 hoveredDay = nil
                             }
                         }
 
                     if let bucket = buckets.first(where: { $0.day == hoveredDay }),
-                       let plotFrame = proxy.plotFrame,
-                       let x = proxy.position(forX: dayMidpoint(bucket.day)),
-                       let y = proxy.position(forY: Double(bucket.sessions)) {
+                        let plotFrame = proxy.plotFrame,
+                        let x = proxy.position(forX: dayMidpoint(bucket.day)),
+                        let y = proxy.position(forY: Double(bucket.sessions))
+                    {
                         let plot = geometry[plotFrame]
                         hoverTooltip(
                             title: bucket.day.formatted(date: .abbreviated, time: .omitted),
@@ -432,23 +459,25 @@ struct AnalyticsView: View {
                         .onContinuousHover { phase in
                             switch phase {
                             case .active(let point):
-                                hoveredHour = hoveredBar(
-                                    at: point,
-                                    in: geometry,
-                                    proxy: proxy,
-                                    buckets: buckets,
-                                    x: { $0.hour },
-                                    value: { $0.durationSeconds / 60 }
-                                )?.hour
+                                hoveredHour =
+                                    hoveredBar(
+                                        at: point,
+                                        in: geometry,
+                                        proxy: proxy,
+                                        buckets: buckets,
+                                        x: { $0.hour },
+                                        value: { $0.durationSeconds / 60 }
+                                    )?.hour
                             case .ended:
                                 hoveredHour = nil
                             }
                         }
 
                     if let bucket = buckets.first(where: { $0.hour == hoveredHour }),
-                       let plotFrame = proxy.plotFrame,
-                       let x = proxy.position(forX: bucket.hour),
-                       let y = proxy.position(forY: bucket.durationSeconds / 60) {
+                        let plotFrame = proxy.plotFrame,
+                        let x = proxy.position(forX: bucket.hour),
+                        let y = proxy.position(forY: bucket.durationSeconds / 60)
+                    {
                         let plot = geometry[plotFrame]
                         hoverTooltip(
                             title: bucket.label,
@@ -483,16 +512,18 @@ struct AnalyticsView: View {
         VStack(spacing: 2) {
             Text(title)
                 .font(.caption.weight(.semibold))
-            Text("\(sessions) \(sessions == 1 ? "session" : "sessions") · \(Self.formatDuration(duration))")
-                .font(.caption2)
+            Text(
+                "\(sessions) \(sessions == 1 ? "session" : "sessions") · \(Self.formatDuration(duration))"
+            )
+            .font(.caption2)
             Text("\(words.formatted()) \(words == 1 ? "word" : "words")")
                 .font(.caption2)
         }
-            .lineLimit(1)
-            .minimumScaleFactor(0.8)
-            .frame(width: width)
-            .padding(.vertical, 5)
-            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 6))
+        .lineLimit(1)
+        .minimumScaleFactor(0.8)
+        .frame(width: width)
+        .padding(.vertical, 5)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 6))
     }
 
     private func clampedTooltipX(_ x: CGFloat, width: CGFloat, in chartWidth: CGFloat) -> CGFloat {
@@ -516,18 +547,23 @@ struct AnalyticsView: View {
         let plot = geometry[plotFrame]
         let localX = point.x - plot.minX
         let localY = point.y - plot.minY
-        guard localX >= 0, localX <= plot.width, localY >= 0, localY <= plot.height else { return nil }
+        guard localX >= 0, localX <= plot.width, localY >= 0, localY <= plot.height else {
+            return nil
+        }
 
         let positions = buckets.compactMap { bucket -> (Bucket, CGFloat)? in
             guard let position = proxy.position(forX: x(bucket)) else { return nil }
             return (bucket, position)
         }
-        guard let nearest = positions.min(by: { abs($0.1 - localX) < abs($1.1 - localX) }) else { return nil }
+        guard let nearest = positions.min(by: { abs($0.1 - localX) < abs($1.1 - localX) }) else {
+            return nil
+        }
         let barWidth = plot.width / CGFloat(max(buckets.count, 1))
         guard abs(nearest.1 - localX) <= barWidth / 2, value(nearest.0) > 0,
-              let top = proxy.position(forY: value(nearest.0)),
-              let bottom = proxy.position(forY: 0.0),
-              localY >= top, localY <= bottom else { return nil }
+            let top = proxy.position(forY: value(nearest.0)),
+            let bottom = proxy.position(forY: 0.0),
+            localY >= top, localY <= bottom
+        else { return nil }
         return nearest.0
     }
 

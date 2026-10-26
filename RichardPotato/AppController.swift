@@ -63,7 +63,8 @@ final class AppController: ObservableObject {
             guard let self, self.store.record(event) else { return event }
             return nil
         }
-        NSEvent.addGlobalMonitorForEvents(matching: [.keyDown, .flagsChanged]) { [weak self] event in
+        NSEvent.addGlobalMonitorForEvents(matching: [.keyDown, .flagsChanged]) {
+            [weak self] event in
             _ = self?.store.record(event)
         }
     }
@@ -71,7 +72,8 @@ final class AppController: ObservableObject {
     func start() {
         guard !didStart else { return }
         didStart = true
-        Log.hotkey.info("Controller starting; shortcut: \(self.store.shortcut.displayName, privacy: .public)")
+        Log.hotkey.info(
+            "Controller starting; shortcut: \(self.store.shortcut.displayName, privacy: .public)")
 
         if !AccessibilityPermission.isGranted {
             Log.hotkey.error("Accessibility permission missing; shortcut inactive")

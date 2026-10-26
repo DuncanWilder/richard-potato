@@ -7,7 +7,9 @@ final class AudioBufferConverter {
     private let outputFormat: AVAudioFormat
 
     init?(inputFormat: AVAudioFormat, outputFormat: AVAudioFormat) {
-        guard let converter = AVAudioConverter(from: inputFormat, to: outputFormat) else { return nil }
+        guard let converter = AVAudioConverter(from: inputFormat, to: outputFormat) else {
+            return nil
+        }
         self.converter = converter
         self.outputFormat = outputFormat
     }
@@ -15,7 +17,9 @@ final class AudioBufferConverter {
     func convert(_ buffer: AVAudioPCMBuffer) -> AVAudioPCMBuffer? {
         let ratio = outputFormat.sampleRate / buffer.format.sampleRate
         let capacity = AVAudioFrameCount(Double(buffer.frameLength) * ratio) + 32
-        guard let output = AVAudioPCMBuffer(pcmFormat: outputFormat, frameCapacity: capacity) else { return nil }
+        guard let output = AVAudioPCMBuffer(pcmFormat: outputFormat, frameCapacity: capacity) else {
+            return nil
+        }
         var error: NSError?
         converter.convert(to: output, error: &error) { _, status in
             status.pointee = .haveData
@@ -27,7 +31,8 @@ final class AudioBufferConverter {
 }
 
 func copyPCMBuffer(_ buffer: AVAudioPCMBuffer) -> AVAudioPCMBuffer? {
-    guard let copy = AVAudioPCMBuffer(pcmFormat: buffer.format, frameCapacity: buffer.frameLength) else {
+    guard let copy = AVAudioPCMBuffer(pcmFormat: buffer.format, frameCapacity: buffer.frameLength)
+    else {
         return nil
     }
     copy.frameLength = buffer.frameLength

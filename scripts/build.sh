@@ -8,9 +8,10 @@ case "$CONFIG" in
   *) echo "Usage: $0 [debug|release]" >&2; exit 1 ;;
 esac
 cd "$ROOT"
+source "$ROOT/scripts/toolchain.sh"
 
-swift build --configuration "$CONFIG" --product RichardPotato
-BIN_DIR="$(swift build --configuration "$CONFIG" --show-bin-path)"
+xcrun swift build --sdk "$SDKROOT" --configuration "$CONFIG" --product RichardPotato
+BIN_DIR="$(xcrun swift build --sdk "$SDKROOT" --configuration "$CONFIG" --show-bin-path)"
 APP="$ROOT/build/$CONFIG/RichardPotato.app"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 # Replace the executable with a new file so macOS discards cached signature data.

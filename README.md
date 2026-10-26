@@ -37,6 +37,17 @@ Richard Potato supports
 
 Requires macOS 26 or later and Swift 6.2 or later with a compatible macOS SDK. The Swift command-line tools are sufficient; a full Xcode installation is not required.
 
+Run the same checks as CI with:
+
+```bash
+./scripts/check.sh       # Debug and Release builds, tests, formatting, and metadata
+./scripts/test.sh        # Swift Testing suite; accepts --filter
+./scripts/format.sh      # Check formatting
+./scripts/format.sh fix  # Apply formatting
+```
+
+CI runs these checks on macOS 26 for pull requests and pushes to `main`. It compiles the app without packaging or signing it. Automated tests do not verify microphone access, Accessibility access, or dictation in the running app.
+
 Run `swift build` to check compilation. The scripts below also create the app bundle, add its icon and privacy descriptions, and sign it.
 
 Run `./scripts/setup-signing.sh` once to create a local code-signing certificate in your login keychain. This step changes the keychain and may ask for your password. Builds stop if the certificate is missing.

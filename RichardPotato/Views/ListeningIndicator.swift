@@ -66,14 +66,17 @@ final class ListeningIndicatorController: ObservableObject {
     func moveToPointerScreen() {
         guard let panel else { return }
         let pointer = NSEvent.mouseLocation
-        guard let screen = NSScreen.screens.first(where: { $0.frame.contains(pointer) })
-            ?? NSScreen.main
-            ?? NSScreen.screens.first else { return }
+        guard
+            let screen = NSScreen.screens.first(where: { $0.frame.contains(pointer) })
+                ?? NSScreen.main
+                ?? NSScreen.screens.first
+        else { return }
         let area = screen.visibleFrame
-        panel.setFrameOrigin(NSPoint(
-            x: area.midX - panel.frame.width / 2,
-            y: area.minY + 18
-        ))
+        panel.setFrameOrigin(
+            NSPoint(
+                x: area.midX - panel.frame.width / 2,
+                y: area.minY + 18
+            ))
     }
 
     private func makePanelIfNeeded() -> NSPanel {
@@ -122,11 +125,13 @@ private struct ListeningIndicatorView: View {
         .padding(.vertical, 1)
         .animation(.easeInOut(duration: 0.18), value: model.state)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(model.state == .recording ? "Dictation recording" : "Dictation finishing")
+        .accessibilityLabel(
+            model.state == .recording ? "Dictation recording" : "Dictation finishing")
     }
 
     private var levelBars: some View {
-        TimelineView(.animation(minimumInterval: 1.0 / 15.0, paused: model.state != .recording)) { timeline in
+        TimelineView(.animation(minimumInterval: 1.0 / 15.0, paused: model.state != .recording)) {
+            timeline in
             let time = timeline.date.timeIntervalSinceReferenceDate
             HStack(alignment: .center, spacing: 3) {
                 ForEach(0..<9) { index in
@@ -141,7 +146,8 @@ private struct ListeningIndicatorView: View {
     }
 
     private var whiteSpinner: some View {
-        TimelineView(.animation(minimumInterval: 1.0 / 30.0, paused: model.state != .processing)) { timeline in
+        TimelineView(.animation(minimumInterval: 1.0 / 30.0, paused: model.state != .processing)) {
+            timeline in
             let angle = timeline.date.timeIntervalSinceReferenceDate * 300
             Circle()
                 .trim(from: 0.08, to: 0.78)

@@ -24,9 +24,12 @@ final class AnalyticsStore: ObservableObject {
         if let fileURL {
             self.fileURL = fileURL
         } else {
-            let support = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
+            let support =
+                FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)
+                .first
                 ?? FileManager.default.temporaryDirectory
-            let directory = support.appendingPathComponent("com.local.RichardPotato", isDirectory: true)
+            let directory = support.appendingPathComponent(
+                "com.local.RichardPotato", isDirectory: true)
             self.fileURL = directory.appendingPathComponent("analytics.json")
         }
         load()
@@ -78,7 +81,8 @@ final class AnalyticsStore: ObservableObject {
             let data = try Data(contentsOf: fileURL)
             events = try decoder.decode([DictationAnalyticsEvent].self, from: data)
         } catch {
-            Log.dictation.error("Failed to load analytics: \(error.localizedDescription, privacy: .public)")
+            Log.dictation.error(
+                "Failed to load analytics: \(error.localizedDescription, privacy: .public)")
             events = []
         }
     }
@@ -90,7 +94,8 @@ final class AnalyticsStore: ObservableObject {
             let data = try encoder.encode(events)
             try data.write(to: fileURL, options: [.atomic])
         } catch {
-            Log.dictation.error("Failed to save analytics: \(error.localizedDescription, privacy: .public)")
+            Log.dictation.error(
+                "Failed to save analytics: \(error.localizedDescription, privacy: .public)")
         }
     }
 }
