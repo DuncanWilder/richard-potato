@@ -96,7 +96,7 @@ final class SettingsWindowController: NSObject, NSWindowDelegate, ObservableObje
 struct SettingsWindowView: View {
     @EnvironmentObject private var controller: AppController
     @ObservedObject var navigation: SettingsWindowController
-    @State private var columnVisibility: NavigationSplitViewVisibility = .all
+    @ViewState private var columnVisibility: NavigationSplitViewVisibility = .all
 
     var body: some View {
         NavigationSplitView(columnVisibility: $columnVisibility) {

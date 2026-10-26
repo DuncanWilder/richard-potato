@@ -6,9 +6,9 @@ cd "$ROOT"
 
 command -v gh >/dev/null || { echo "Install GitHub CLI (gh) first." >&2; exit 1; }
 
-versions="$(sed -n 's/.*MARKETING_VERSION = \([^;]*\);/\1/p' RichardPotato.xcodeproj/project.pbxproj | sort -u)"
+versions="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' Resources/Info.plist)"
 if [[ ! "$versions" =~ ^[0-9]+\.[0-9]+(\.[0-9]+)?$ ]]; then
-  echo "Expected one numeric MARKETING_VERSION in the Xcode project." >&2
+  echo "Expected a numeric CFBundleShortVersionString in Resources/Info.plist." >&2
   exit 1
 fi
 tag="v$versions"

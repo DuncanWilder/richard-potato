@@ -1,6 +1,10 @@
 import AppKit
 import SwiftUI
 
+// Select the State property wrapper explicitly. The macOS 27 SDK also
+// exports a State macro whose plugin is absent from command-line tools.
+typealias ViewState<Value> = SwiftUI.State<Value>
+
 @main
 struct RichardPotatoApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var delegate

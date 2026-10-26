@@ -2,10 +2,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-SCHEME="RichardPotato"
-CONFIG="Debug"
-DERIVED_DATA="$ROOT/build/DerivedData"
-APP="$DERIVED_DATA/Build/Products/$CONFIG/RichardPotato.app"
+APP="$ROOT/build/debug/RichardPotato.app"
 BUNDLE_ID="com.local.RichardPotato"
 
 cd "$ROOT"
@@ -32,24 +29,8 @@ quit_app() {
   sleep 0.25
 }
 
+"$ROOT/scripts/build.sh" debug
 quit_app
-
-echo "Building ${SCHEME} (${CONFIG})..."
-# See scripts/release.sh: -quiet mislabels warning-only tasks as failures.
-xcodebuild \
-  -scheme "$SCHEME" \
-  -configuration "$CONFIG" \
-  -destination 'generic/platform=macOS' \
-  -derivedDataPath "$DERIVED_DATA" \
-  -quiet \
-  build 2>&1 | sed '/^error: the following command failed with exit code 0 but produced no further output$/d'
-
-if [[ ! -d "$APP" ]]; then
-  echo "Build succeeded but app not found at: $APP" >&2
-  exit 1
-fi
-
-codesign --verify --deep --strict "$APP"
 
 echo "Launching ${APP}"
 open "$APP"
