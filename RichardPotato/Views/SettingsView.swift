@@ -74,10 +74,13 @@ struct SettingsView: View {
                 loginItemStatus = SMAppService.mainApp.status
             }
         }
-        .alert("Could not change Open at login", isPresented: Binding(
-            get: { loginItemError != nil },
-            set: { if !$0 { loginItemError = nil } }
-        )) {
+        .alert(
+            "Could not change Open at login",
+            isPresented: Binding(
+                get: { loginItemError != nil },
+                set: { if !$0 { loginItemError = nil } }
+            )
+        ) {
             Button("OK", role: .cancel) { loginItemError = nil }
         } message: {
             Text(loginItemError ?? "")
@@ -186,7 +189,10 @@ struct CustomCorrectionsView: View {
                             .padding(.horizontal, 6)
                             .padding(.vertical, 4)
                             .background(.background, in: RoundedRectangle(cornerRadius: 5))
-                            .overlay(RoundedRectangle(cornerRadius: 5).strokeBorder(Color(nsColor: .separatorColor)))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 5).strokeBorder(
+                                    Color(nsColor: .separatorColor))
+                            )
                             .accessibilityLabel("Heard phrase")
                         Image(systemName: "arrow.right")
                             .frame(width: 16)
@@ -199,7 +205,10 @@ struct CustomCorrectionsView: View {
                             .padding(.horizontal, 6)
                             .padding(.vertical, 4)
                             .background(.background, in: RoundedRectangle(cornerRadius: 5))
-                            .overlay(RoundedRectangle(cornerRadius: 5).strokeBorder(Color(nsColor: .separatorColor)))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 5).strokeBorder(
+                                    Color(nsColor: .separatorColor))
+                            )
                             .accessibilityLabel("Write as")
                         Button {
                             controller.store.corrections.removeAll { $0.id == correction.id }
@@ -226,11 +235,16 @@ struct CustomCorrectionsView: View {
         .padding(28)
     }
 
-    private func correctionBinding(_ id: UUID, keyPath: WritableKeyPath<TextCorrection, String>) -> Binding<String> {
+    private func correctionBinding(_ id: UUID, keyPath: WritableKeyPath<TextCorrection, String>)
+        -> Binding<String>
+    {
         Binding(
-            get: { controller.store.corrections.first(where: { $0.id == id })?[keyPath: keyPath] ?? "" },
+            get: {
+                controller.store.corrections.first(where: { $0.id == id })?[keyPath: keyPath] ?? ""
+            },
             set: { value in
-                guard let index = controller.store.corrections.firstIndex(where: { $0.id == id }) else { return }
+                guard let index = controller.store.corrections.firstIndex(where: { $0.id == id })
+                else { return }
                 controller.store.corrections[index][keyPath: keyPath] = value
                 controller.store.save()
             }

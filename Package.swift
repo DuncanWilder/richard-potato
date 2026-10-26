@@ -11,6 +11,11 @@ let package = Package(
             path: "RichardPotato",
             exclude: ["Assets.xcassets", "RichardPotato.entitlements"],
             swiftSettings: [.swiftLanguageMode(.v5)]
-        )
+        ),
+        .testTarget(
+            name: "RichardPotatoTests",
+            dependencies: ["RichardPotato"],
+            path: "RichardPotatoTests"
+        ),
     ]
 )

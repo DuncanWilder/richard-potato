@@ -49,7 +49,8 @@ enum AudioInputDevices {
             .filter { hasInputChannels($0) }
             .compactMap { id in
                 guard let uid = stringProperty(id, selector: kAudioDevicePropertyDeviceUID),
-                      let name = stringProperty(id, selector: kAudioObjectPropertyName) else {
+                    let name = stringProperty(id, selector: kAudioObjectPropertyName)
+                else {
                     return nil
                 }
                 return AudioInputDevice(id: id, uid: uid, name: name)
@@ -104,27 +105,31 @@ enum AudioInputDevices {
             mElement: kAudioObjectPropertyElementMain
         )
         var size = UInt32(0)
-        guard AudioObjectGetPropertyDataSize(
-            AudioObjectID(kAudioObjectSystemObject),
-            &address,
-            0,
-            nil,
-            &size
-        ) == noErr else {
+        guard
+            AudioObjectGetPropertyDataSize(
+                AudioObjectID(kAudioObjectSystemObject),
+                &address,
+                0,
+                nil,
+                &size
+            ) == noErr
+        else {
             return []
         }
 
         let count = Int(size) / MemoryLayout<AudioDeviceID>.size
         guard count > 0 else { return [] }
         var ids = [AudioDeviceID](repeating: 0, count: count)
-        guard AudioObjectGetPropertyData(
-            AudioObjectID(kAudioObjectSystemObject),
-            &address,
-            0,
-            nil,
-            &size,
-            &ids
-        ) == noErr else {
+        guard
+            AudioObjectGetPropertyData(
+                AudioObjectID(kAudioObjectSystemObject),
+                &address,
+                0,
+                nil,
+                &size,
+                &ids
+            ) == noErr
+        else {
             return []
         }
         return ids
@@ -137,7 +142,8 @@ enum AudioInputDevices {
             mElement: kAudioObjectPropertyElementMain
         )
         var size = UInt32(0)
-        guard AudioObjectGetPropertyDataSize(deviceID, &address, 0, nil, &size) == noErr, size > 0 else {
+        guard AudioObjectGetPropertyDataSize(deviceID, &address, 0, nil, &size) == noErr, size > 0
+        else {
             return false
         }
 
@@ -150,11 +156,14 @@ enum AudioInputDevices {
             return false
         }
 
-        let list = UnsafeMutableAudioBufferListPointer(buffer.assumingMemoryBound(to: AudioBufferList.self))
+        let list = UnsafeMutableAudioBufferListPointer(
+            buffer.assumingMemoryBound(to: AudioBufferList.self))
         return list.contains { $0.mNumberChannels > 0 }
     }
 
-    private static func stringProperty(_ deviceID: AudioDeviceID, selector: AudioObjectPropertySelector) -> String? {
+    private static func stringProperty(
+        _ deviceID: AudioDeviceID, selector: AudioObjectPropertySelector
+    ) -> String? {
         var address = AudioObjectPropertyAddress(
             mSelector: selector,
             mScope: kAudioObjectPropertyScopeGlobal,

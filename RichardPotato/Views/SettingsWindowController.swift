@@ -128,10 +128,12 @@ struct SettingsWindowView: View {
 
     private var sidebar: some View {
         VStack(spacing: 0) {
-            List(selection: Binding<SettingsWindowController.Page?>(
-                get: { navigation.selectedPage },
-                set: { if let page = $0 { navigation.selectedPage = page } }
-            )) {
+            List(
+                selection: Binding<SettingsWindowController.Page?>(
+                    get: { navigation.selectedPage },
+                    set: { if let page = $0 { navigation.selectedPage = page } }
+                )
+            ) {
                 Section("Richard Potato") {
                     ForEach(SettingsWindowController.Page.allCases) { page in
                         Label(page.title, systemImage: page.systemImage)
@@ -141,12 +143,14 @@ struct SettingsWindowView: View {
             }
             .listStyle(.sidebar)
 
-            Text("Richard Potato \(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "Unknown")")
-                .font(.caption2)
-                .foregroundStyle(.secondary)
-                .frame(maxWidth: .infinity)
-                .padding(.horizontal, 14)
-                .padding(.vertical, 10)
+            Text(
+                "Richard Potato \(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "Unknown")"
+            )
+            .font(.caption2)
+            .foregroundStyle(.secondary)
+            .frame(maxWidth: .infinity)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 10)
         }
     }
 }

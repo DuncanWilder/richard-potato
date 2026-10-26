@@ -8,15 +8,16 @@ enum TranscriptRefiner {
             return transcript
         }
 
-        let session = LanguageModelSession(instructions: """
-            You are a copy editor for speech transcripts. Edit the supplied text, \
-            not the ideas in it. Remove only filler words such as um and uh, \
-            repeated words, and clear false starts. Correct capitalization, \
-            punctuation, and obvious grammar errors. Keep every question as a \
-            question. Preserve the speaker's meaning, names, facts, and wording \
-            as closely as possible. Do not answer questions, summarize, explain, \
-            infer intent, or add information. Return only the edited transcript.
-            """)
+        let session = LanguageModelSession(
+            instructions: """
+                You are a copy editor for speech transcripts. Edit the supplied text, \
+                not the ideas in it. Remove only filler words such as um and uh, \
+                repeated words, and clear false starts. Correct capitalization, \
+                punctuation, and obvious grammar errors. Keep every question as a \
+                question. Preserve the speaker's meaning, names, facts, and wording \
+                as closely as possible. Do not answer questions, summarize, explain, \
+                infer intent, or add information. Return only the edited transcript.
+                """)
         do {
             let response = try await session.respond(to: transcript)
             let result = response.content.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -26,7 +27,8 @@ enum TranscriptRefiner {
             }
             return result
         } catch {
-            Log.dictation.error("Transcript refinement failed: \(error.localizedDescription, privacy: .public)")
+            Log.dictation.error(
+                "Transcript refinement failed: \(error.localizedDescription, privacy: .public)")
             return transcript
         }
     }

@@ -100,7 +100,8 @@ final class HotkeyMonitor {
     }
 
     private func installTap() {
-        let mask = (1 << CGEventType.keyDown.rawValue)
+        let mask =
+            (1 << CGEventType.keyDown.rawValue)
             | (1 << CGEventType.keyUp.rawValue)
             | (1 << CGEventType.flagsChanged.rawValue)
 
@@ -111,14 +112,16 @@ final class HotkeyMonitor {
         }
 
         let refcon = Unmanaged.passUnretained(self).toOpaque()
-        guard let tap = CGEvent.tapCreate(
-            tap: .cgSessionEventTap,
-            place: .headInsertEventTap,
-            options: .defaultTap,
-            eventsOfInterest: CGEventMask(mask),
-            callback: callback,
-            userInfo: refcon
-        ) else {
+        guard
+            let tap = CGEvent.tapCreate(
+                tap: .cgSessionEventTap,
+                place: .headInsertEventTap,
+                options: .defaultTap,
+                eventsOfInterest: CGEventMask(mask),
+                callback: callback,
+                userInfo: refcon
+            )
+        else {
             return
         }
 
@@ -172,7 +175,9 @@ final class HotkeyMonitor {
             }
         }()
 
-        if shortcut.matchesPress(type: eventType, keyCode: keyCode, flags: flags, isARepeat: isARepeat) {
+        if shortcut.matchesPress(
+            type: eventType, keyCode: keyCode, flags: flags, isARepeat: isARepeat)
+        {
             if !isHeld {
                 isHeld = true
                 Log.hotkey.info("Shortcut pressed (keyCode: \(keyCode))")
@@ -220,7 +225,7 @@ enum AccessibilityPermission {
     static func openSettings() {
         let urls = [
             "x-apple.systempreferences:com.apple.settings.PrivacySecurity.extension?Privacy_Accessibility",
-            "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility"
+            "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility",
         ]
         for string in urls {
             if let url = URL(string: string) {

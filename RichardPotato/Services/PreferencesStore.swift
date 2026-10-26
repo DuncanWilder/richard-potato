@@ -29,14 +29,16 @@ final class PreferencesStore: ObservableObject {
 
     init(defaults: UserDefaults = .standard) {
         if let data = defaults.data(forKey: shortcutKey),
-           let decoded = try? JSONDecoder().decode(KeyShortcut.self, from: data) {
+            let decoded = try? JSONDecoder().decode(KeyShortcut.self, from: data)
+        {
             shortcut = decoded
         } else {
             shortcut = .default
         }
 
         if let raw = defaults.string(forKey: modeKey),
-           let mode = ActivationMode(rawValue: raw) {
+            let mode = ActivationMode(rawValue: raw)
+        {
             activationMode = mode
         } else {
             activationMode = .hold
@@ -46,14 +48,16 @@ final class PreferencesStore: ObservableObject {
         postProcessTranscript = defaults.bool(forKey: postProcessKey)
         showListeningIndicator = defaults.object(forKey: indicatorKey) as? Bool ?? true
         if let data = defaults.data(forKey: correctionsKey),
-           let decoded = try? JSONDecoder().decode([TextCorrection].self, from: data) {
+            let decoded = try? JSONDecoder().decode([TextCorrection].self, from: data)
+        {
             corrections = decoded
         } else {
             corrections = []
         }
 
         if let raw = defaults.string(forKey: insertionKey),
-           let method = InsertionMethod(rawValue: raw) {
+            let method = InsertionMethod(rawValue: raw)
+        {
             insertionMethod = method
         } else {
             insertionMethod = .typing
@@ -95,20 +99,25 @@ final class PreferencesStore: ObservableObject {
         }.sorted { $0.0.count > $1.0.count }
         guard !rules.isEmpty else { return text }
 
-        let pattern = rules.map { NSRegularExpression.escapedPattern(for: $0.0) }.joined(separator: "|")
-        guard let regex = try? NSRegularExpression(
-            pattern: "(?<![\\p{L}\\p{N}])(?:\(pattern))(?![\\p{L}\\p{N}])",
-            options: [.caseInsensitive]
-        ) else { return text }
+        let pattern = rules.map { NSRegularExpression.escapedPattern(for: $0.0) }.joined(
+            separator: "|")
+        guard
+            let regex = try? NSRegularExpression(
+                pattern: "(?<![\\p{L}\\p{N}])(?:\(pattern))(?![\\p{L}\\p{N}])",
+                options: [.caseInsensitive]
+            )
+        else { return text }
 
         let source = text as NSString
         let matches = regex.matches(in: text, range: NSRange(location: 0, length: source.length))
         var corrected = text
         for match in matches.reversed() {
             let heard = source.substring(with: match.range)
-            guard let replacement = rules.first(where: {
-                $0.0.compare(heard, options: [.caseInsensitive]) == .orderedSame
-            })?.1, let range = Range(match.range, in: corrected) else { continue }
+            guard
+                let replacement = rules.first(where: {
+                    $0.0.compare(heard, options: [.caseInsensitive]) == .orderedSame
+                })?.1, let range = Range(match.range, in: corrected)
+            else { continue }
             corrected.replaceSubrange(range, with: replacement)
         }
         return corrected
@@ -122,7 +131,9 @@ final class PreferencesStore: ObservableObject {
         }
         guard let next = KeyShortcut.from(event: event) else { return false }
         if event.type == .keyUp { return false }
-        if event.type == .flagsChanged, event.modifierFlags.intersection(KeyShortcut.meaningfulFlags).isEmpty {
+        if event.type == .flagsChanged,
+            event.modifierFlags.intersection(KeyShortcut.meaningfulFlags).isEmpty
+        {
             return false
         }
         shortcut = next

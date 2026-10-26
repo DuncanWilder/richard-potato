@@ -96,7 +96,9 @@ struct KeyShortcut: Equatable, Codable {
         matchesRelease(type: event.type, keyCode: UInt16(event.keyCode), flags: event.modifierFlags)
     }
 
-    func matchesRelease(type: NSEvent.EventType, keyCode: UInt16, flags: NSEvent.ModifierFlags) -> Bool {
+    func matchesRelease(type: NSEvent.EventType, keyCode: UInt16, flags: NSEvent.ModifierFlags)
+        -> Bool
+    {
         if isModifierOnly {
             guard type == .flagsChanged else { return false }
             guard keyCode == self.keyCode else { return false }
@@ -139,7 +141,7 @@ struct KeyShortcut: Equatable, Codable {
             50: "`", 51: "Delete", 53: "Escape", 96: "F5", 97: "F6", 98: "F7",
             99: "F3", 100: "F8", 101: "F9", 103: "F11", 105: "F13", 107: "F14",
             109: "F10", 111: "F12", 113: "F15", 118: "F4", 120: "F2", 122: "F1",
-            123: "Left", 124: "Right", 125: "Down", 126: "Up"
+            123: "Left", 124: "Right", 125: "Down", 126: "Up",
         ]
         return names[keyCode] ?? "Key \(keyCode)"
     }

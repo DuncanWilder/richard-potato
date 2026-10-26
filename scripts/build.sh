@@ -8,12 +8,16 @@ case "$CONFIG" in
   *) echo "Usage: $0 [debug|release]" >&2; exit 1 ;;
 esac
 cd "$ROOT"
+source "$ROOT/scripts/toolchain.sh"
 
-swift build --configuration "$CONFIG" --product RichardPotato
-BIN_DIR="$(swift build --configuration "$CONFIG" --show-bin-path)"
+xcrun swift build --sdk "$SDKROOT" --configuration "$CONFIG" --product RichardPotato
+BIN_DIR="$(xcrun swift build --sdk "$SDKROOT" --configuration "$CONFIG" --show-bin-path)"
 APP="$ROOT/build/$CONFIG/RichardPotato.app"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
-cp "$BIN_DIR/RichardPotato" "$APP/Contents/MacOS/RichardPotato"
+# Replace the executable with a new file so macOS discards cached signature data.
+STAGED_BIN="$(mktemp "$APP/Contents/MacOS/.RichardPotato.XXXXXX")"
+cp -p "$BIN_DIR/RichardPotato" "$STAGED_BIN"
+mv -f "$STAGED_BIN" "$APP/Contents/MacOS/RichardPotato"
 cp "$ROOT/Resources/Info.plist" "$APP/Contents/Info.plist"
 
 # iconutil is included with macOS; an asset catalog compiler is not needed.
