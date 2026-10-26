@@ -37,6 +37,9 @@ final class ListeningIndicatorController: ObservableObject {
                 MainActor.assumeIsolated {
                     guard let self, self.transitionID == currentTransition else { return }
                     panel?.orderOut(nil)
+                    // A hidden panel retains its SwiftUI timelines. Remove the
+                    // view so neither animation continues between dictations.
+                    panel?.contentView = nil
                 }
             }
             return
@@ -44,6 +47,9 @@ final class ListeningIndicatorController: ObservableObject {
 
         let panel = makePanelIfNeeded()
         state = nextState
+        if panel.contentView == nil {
+            panel.contentView = NSHostingView(rootView: ListeningIndicatorView(model: self))
+        }
         guard !isVisible else { return }
         isVisible = true
         moveToPointerScreen()

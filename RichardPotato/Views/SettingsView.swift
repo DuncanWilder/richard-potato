@@ -5,8 +5,8 @@ import SwiftUI
 struct SettingsView: View {
     @EnvironmentObject private var controller: AppController
     @Environment(\.scenePhase) private var scenePhase
-    @State private var loginItemStatus = SMAppService.mainApp.status
-    @State private var loginItemError: String?
+    @ViewState private var loginItemStatus = SMAppService.mainApp.status
+    @ViewState private var loginItemError: String?
 
     private static let systemDefaultTag = "system-default"
 

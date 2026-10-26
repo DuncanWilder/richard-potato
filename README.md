@@ -31,7 +31,9 @@ Richard Potato supports
 
 ## Build and run
 
-Requires macOS 26 or later and Xcode 27 or later.
+Requires macOS 26 or later and Swift 6.2 or later with a compatible macOS SDK. The Swift command-line tools are sufficient; a full Xcode installation is not required.
+
+Run `swift build` to check compilation. The scripts below also create the app bundle, add its icon and privacy descriptions, and sign it.
 
 Run `./scripts/setup-signing.sh` once to create a local code-signing certificate in your login keychain. This step changes the keychain and may ask for your password. Builds stop if the certificate is missing.
 
@@ -42,7 +44,7 @@ Run `./scripts/setup-signing.sh` once to create a local code-signing certificate
 
 To publish a release, commit and push your changes, then run `./scripts/github-release.sh`. It asks for release notes and uploads the zip to a GitHub release tagged with the project version.
 
-The build scheme signs Debug and Release apps with the same certificate so macOS can retain their permission grants. A release from this local certificate is not Apple notarized. Recipients may need to right-click the app and select **Open** on first use.
+The build script signs Debug and Release apps with the same certificate so macOS can retain their permission grants. A release from this local certificate is not Apple notarized. Recipients may need to right-click the app and select **Open** on first use.
 
 ## Use
 

@@ -22,11 +22,11 @@ if xattr -p com.apple.quarantine "$APP" >/dev/null 2>&1; then
   exit 1
 fi
 
-# Xcode has already signed nested code. Sign the outer app with one certificate
-# so Debug and Release have the same designated requirement on every build.
+# Sign with one certificate so Debug and Release keep the same identity.
 codesign --force \
   --sign "$IDENTITY" \
-  --preserve-metadata=entitlements,flags \
+  --options runtime \
+  --entitlements "$(cd "$(dirname "$0")/.." && pwd)/RichardPotato/RichardPotato.entitlements" \
   "$APP"
 
 codesign --verify --deep --strict --verbose=2 "$APP"

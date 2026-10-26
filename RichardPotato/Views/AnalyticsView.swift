@@ -4,12 +4,12 @@ import SwiftUI
 struct AnalyticsView: View {
     @ObservedObject var analytics: AnalyticsStore
 
-    @State private var range: AnalyticsRange = .last7Days
-    @State private var chartMode: ChartMode = .day
-    @State private var confirmReset = false
-    @State private var hoveredDay: Date?
-    @State private var hoveredHour: Int?
-    @State private var hoveredActivityDay: Date?
+    @ViewState private var range: AnalyticsRange = .last7Days
+    @ViewState private var chartMode: ChartMode = .day
+    @ViewState private var confirmReset = false
+    @ViewState private var hoveredDay: Date?
+    @ViewState private var hoveredHour: Int?
+    @ViewState private var hoveredActivityDay: Date?
 
     private enum ChartMode: String, CaseIterable, Identifiable {
         case day
