@@ -3,7 +3,7 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 APP="$ROOT/build/debug/RichardPotato.app"
-BUNDLE_ID="com.local.RichardPotato"
+BUNDLE_ID="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$ROOT/Resources/Info.plist")"
 
 cd "$ROOT"
 
@@ -29,8 +29,8 @@ quit_app() {
   sleep 0.25
 }
 
-"$ROOT/scripts/build.sh" debug
 quit_app
+"$ROOT/scripts/build.sh" debug
 
 echo "Launching ${APP}"
 open "$APP"
