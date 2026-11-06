@@ -67,6 +67,47 @@ Grant Microphone and Accessibility access on first use. Use the menu bar icon to
 
 The app prepares the speech model at launch. It opens the microphone when dictation starts and closes it when dictation ends. Analytics saves session times, durations, and word counts locally. It does not save audio or transcript text.
 
+## Settings file
+
+All app preferences and custom corrections are stored in:
+
+```text
+~/Library/Application Support/Richard Potato/settings.json
+```
+
+The path does not depend on the app bundle ID or signing certificate. The JSON
+contains a `version` field. Saves use an atomic file replacement and keep the
+previous valid settings in `settings.json.bak`. The first save also creates a
+backup.
+
+On first use, the app imports UserDefaults from the current app and the known
+`com.duncanwilder.RichardPotato` and `com.local.RichardPotato` domains. It combines
+distinct corrections from these domains and leaves the old data unchanged.
+On the first launch of each app version and build number, the app also checks
+these domains and other matching app preference files, including ByHost files.
+It adds new replacements to an existing JSON file. Current JSON replacements
+have priority for the same phrase. The JSON records the replacements already
+found, so later updates do not restore replacements you have deleted. Other
+settings in an existing JSON file stay unchanged.
+
+Existing choices, including paste mode, are kept. Version 1.2.1 changed the bundle
+ID from `com.local.RichardPotato` to `com.duncanwilder.RichardPotato`. This changed
+the UserDefaults domain and can make earlier corrections appear to be lost.
+
+Use **Reveal settings file in Finder** in Settings to find the file. To transfer
+preferences to another Mac, quit the app on both Macs and copy `settings.json` to
+the same location on the other Mac. Quit the app before you edit the file; changes
+are read at the next launch. A microphone selection needs a matching device on
+the other Mac. **Open at login** is a macOS registration and must be set on each
+Mac. Permissions and analytics are separate from this file.
+
+If the settings file is missing or damaged, the app restores a valid backup when
+available. It copies damaged data to `settings.invalid-<unique ID>.json` before
+recovery. Recovery and file errors appear in the menu and Settings. If recovery
+fails, the app uses temporary default values and blocks saves to protect the
+files. Restore a valid file, then restart the app. A settings file from a newer
+format is kept unchanged and needs an app that supports that format.
+
 ## License
 
 This project is released under [The Unlicense](UNLICENSE).

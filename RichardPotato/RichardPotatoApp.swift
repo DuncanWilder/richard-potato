@@ -12,6 +12,14 @@ struct RichardPotatoApp: App {
 
     var body: some Scene {
         MenuBarExtra {
+            if let message = controller.store.storageMessage {
+                Text(message)
+                Button("Reveal settings file in Finder") {
+                    NSWorkspace.shared.activateFileViewerSelecting([controller.store.fileURL])
+                }
+                Divider()
+            }
+
             if !controller.hotkeyActive {
                 Text("Shortcut inactive — needs Accessibility permission")
                 Button("Grant Accessibility access…") {
