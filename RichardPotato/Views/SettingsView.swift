@@ -58,11 +58,19 @@ struct SettingsView: View {
                 }
 
                 Toggle("Show dictation bar", isOn: indicatorBinding)
+
+                Button("Reveal settings file in Finder") {
+                    NSWorkspace.shared.activateFileViewerSelecting([controller.store.fileURL])
+                }
+                if let message = controller.store.storageMessage {
+                    Text(message)
+                        .font(.caption)
+                        .foregroundStyle(.red)
+                }
             }
         }
         .formStyle(.grouped)
         .toggleStyle(.switch)
-        .scrollDisabled(true)
         .padding(.horizontal, 8)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .onAppear {

@@ -18,76 +18,61 @@ final class PreferencesStore: ObservableObject {
     @Published var corrections: [TextCorrection]
     @Published var isRecording = false
 
-    private let shortcutKey = "shortcut"
-    private let modeKey = "activationMode"
-    private let microphoneKey = "microphoneUID"
-    private let insertionKey = "insertionMethod"
-    private let postProcessKey = "postProcessTranscript"
-    private let indicatorKey = "showListeningIndicator"
-    private let correctionsKey = "textCorrections"
-    private let liveTypingMigrationKey = "didMigrateToLiveTyping"
+    @Published private(set) var storageMessage: String?
+    let fileURL: URL
+    private var canSave = true
+    private var persistedSettings = StoredSettings()
 
-    init(defaults: UserDefaults = .standard) {
-        if let data = defaults.data(forKey: shortcutKey),
-            let decoded = try? JSONDecoder().decode(KeyShortcut.self, from: data)
-        {
-            shortcut = decoded
-        } else {
-            shortcut = .default
+    init(
+        defaults: UserDefaults = .standard, fileURL: URL? = nil,
+        legacyDomains: [[String: Any]]? = nil,
+        recoveryBuild: String = StoredSettings.currentBuild
+    ) {
+        self.fileURL = fileURL ?? SettingsFile.defaultURL
+        var settings = StoredSettings()
+        do {
+            let result = try SettingsFile(url: self.fileURL).load()
+            settings = result.settings ?? StoredSettings()
+            if result.settings == nil || settings.lastRecoveryBuild != recoveryBuild {
+                let domains = try legacyDomains ?? LegacySettings.domains(defaults: defaults)
+                if result.settings == nil {
+                    settings = try StoredSettings.migrate(domains: domains)
+                }
+                try settings.recoverCorrections(domains: domains, build: recoveryBuild)
+                try SettingsFile(url: self.fileURL).save(settings)
+            }
+            storageMessage = result.message
+        } catch {
+            canSave = false
+            storageMessage =
+                "Settings could not be loaded. Changes will not be saved. "
+                + error.localizedDescription
         }
-
-        if let raw = defaults.string(forKey: modeKey),
-            let mode = ActivationMode(rawValue: raw)
-        {
-            activationMode = mode
-        } else {
-            activationMode = .hold
-        }
-
-        microphoneUID = defaults.string(forKey: microphoneKey)
-        postProcessTranscript = defaults.bool(forKey: postProcessKey)
-        showListeningIndicator = defaults.object(forKey: indicatorKey) as? Bool ?? true
-        if let data = defaults.data(forKey: correctionsKey),
-            let decoded = try? JSONDecoder().decode([TextCorrection].self, from: data)
-        {
-            corrections = decoded
-        } else {
-            corrections = []
-        }
-
-        if let raw = defaults.string(forKey: insertionKey),
-            let method = InsertionMethod(rawValue: raw)
-        {
-            insertionMethod = method
-        } else {
-            insertionMethod = .typing
-        }
-
-        // Live typing replaced the old paste-at-the-end default, so move
-        // existing installs across once. Choosing paste again sticks.
-        if !defaults.bool(forKey: liveTypingMigrationKey) {
-            defaults.set(true, forKey: liveTypingMigrationKey)
-            insertionMethod = .typing
-            defaults.set(InsertionMethod.typing.rawValue, forKey: insertionKey)
-        }
+        persistedSettings = settings
+        shortcut = settings.shortcut
+        activationMode = settings.activationMode
+        microphoneUID = settings.microphoneUID
+        insertionMethod = settings.insertionMethod
+        postProcessTranscript = settings.postProcessTranscript
+        showListeningIndicator = settings.showListeningIndicator
+        corrections = settings.corrections
     }
 
     func save() {
-        let defaults = UserDefaults.standard
-        if let data = try? JSONEncoder().encode(shortcut) {
-            defaults.set(data, forKey: shortcutKey)
-        }
-        defaults.set(activationMode.rawValue, forKey: modeKey)
-        defaults.set(insertionMethod.rawValue, forKey: insertionKey)
-        defaults.set(postProcessTranscript, forKey: postProcessKey)
-        defaults.set(showListeningIndicator, forKey: indicatorKey)
-        if let data = try? JSONEncoder().encode(corrections) {
-            defaults.set(data, forKey: correctionsKey)
-        }
-        if let microphoneUID {
-            defaults.set(microphoneUID, forKey: microphoneKey)
-        } else {
-            defaults.removeObject(forKey: microphoneKey)
+        guard canSave else { return }
+        var settings = persistedSettings
+        settings.shortcut = shortcut
+        settings.activationMode = activationMode
+        settings.microphoneUID = microphoneUID
+        settings.insertionMethod = insertionMethod
+        settings.postProcessTranscript = postProcessTranscript
+        settings.showListeningIndicator = showListeningIndicator
+        settings.corrections = corrections
+        do {
+            try SettingsFile(url: fileURL).save(settings)
+            persistedSettings = settings
+        } catch {
+            storageMessage = "Settings could not be saved. " + error.localizedDescription
         }
     }
 
