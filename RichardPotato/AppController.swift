@@ -28,6 +28,15 @@ final class AppController: ObservableObject {
     private var cancellables: Set<AnyCancellable> = []
     private var pipeline: Task<Void, Never>?
     private var didStart = false
+    // Buffer typing until release: a later key can invalidate the whole held gesture.
+    private var hotkeyHeld = false
+    private var stopOnRelease = false
+    private var captureRequested = false
+    private final class CaptureAcceptance {
+        var discarded = false
+    }
+    private var acceptance: CaptureAcceptance?
+
     /// Wall-clock start of the active mic-open capture, for analytics.
     private var captureStartedAt: Date?
 
@@ -37,6 +46,9 @@ final class AppController: ObservableObject {
         }
         hotkey.onRelease = { [weak self] in
             self?.handleRelease()
+        }
+        hotkey.onCancel = { [weak self] in
+            self?.cancelHotkeyCapture()
         }
         hotkey.onTapStateChange = { [weak self] installed in
             self?.hotkeyActive = installed
@@ -117,13 +129,14 @@ final class AppController: ObservableObject {
 
     func handlePress() {
         if store.isRecording { return }
+        hotkeyHeld = true
         Log.hotkey.info("Handling press in \(self.store.activationMode.rawValue) mode")
         switch store.activationMode {
         case .hold:
             startDictation()
         case .toggle:
-            if engine.isCapturing {
-                stopDictation()
+            if captureRequested {
+                stopOnRelease = true
             } else {
                 startDictation()
             }
@@ -131,15 +144,38 @@ final class AppController: ObservableObject {
     }
 
     func handleRelease() {
-        guard store.activationMode == .hold else { return }
-        stopDictation()
+        hotkeyHeld = false
+        if store.activationMode == .hold || stopOnRelease {
+            stopOnRelease = false
+            stopDictation()
+        } else {
+            streamTranscript()
+        }
+    }
+
+    private func cancelHotkeyCapture() {
+        hotkeyHeld = false
+        stopOnRelease = false
+        captureRequested = false
+        acceptance?.discarded = true
+        engine.endTailEarly()
+        enqueue { [self] in
+            engine.discardCapture()
+            live.cancel()
+            captureStartedAt = nil
+            await engine.prepareForNextCapture()
+            syncListeningIndicator()
+        }
     }
 
     func startDictation() {
+        captureRequested = true
+        let acceptance = CaptureAcceptance()
+        self.acceptance = acceptance
         // Starting again should not wait out the previous dictation's tail.
         engine.endTailEarly()
         enqueue { [self] in
-            guard !engine.isCapturing else { return }
+            guard !acceptance.discarded, !engine.isCapturing else { return }
             Log.dictation.info("Starting capture (engine ready: \(self.engine.isReady))")
             if store.insertionMethod == .typing {
                 live.begin()
@@ -152,11 +188,17 @@ final class AppController: ObservableObject {
     }
 
     func stopDictation() {
+        captureRequested = false
+        guard let acceptance else { return }
         enqueue { [self] in
-            guard engine.isCapturing else { return }
+            guard !acceptance.discarded, engine.isCapturing else { return }
             isFinishingDictation = true
             syncListeningIndicator()
             let text = store.correct(await engine.endCapture())
+            guard !acceptance.discarded else {
+                isFinishingDictation = false
+                return
+            }
             let endedAt = Date()
             if let startedAt = captureStartedAt {
                 analytics.record(startedAt: startedAt, endedAt: endedAt, transcript: text)
@@ -170,7 +212,9 @@ final class AppController: ObservableObject {
             case .paste:
                 if store.postProcessTranscript && !text.isEmpty {
                     let refined = await TranscriptRefiner.refine(text)
-                    TextInserter.insert(refined, using: .paste)
+                    if !acceptance.discarded {
+                        TextInserter.insert(refined, using: .paste)
+                    }
                 } else {
                     TextInserter.insert(text, using: .paste)
                 }
@@ -214,7 +258,9 @@ final class AppController: ObservableObject {
     private func streamTranscript() {
         // Keyed to the live stream rather than `isCapturing` so words spoken
         // into the tail keep appearing after the key is released.
-        guard store.insertionMethod == .typing, live.isActive else { return }
+        guard !hotkeyHeld, acceptance?.discarded == false,
+            store.insertionMethod == .typing, live.isActive
+        else { return }
         live.update(to: store.correct(engine.displayedText))
     }
 }

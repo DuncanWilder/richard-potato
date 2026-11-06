@@ -112,6 +112,16 @@ final class DictationEngine: ObservableObject {
         return text
     }
 
+    /// Drops captured audio and results without a tail or text output.
+    func discardCapture() {
+        endTailEarly()
+        session = CaptureSession()
+        teardown()
+        isCapturing = false
+        displayedText = ""
+        status = isReady ? "Ready" : status
+    }
+
     /// Keeps the microphone open briefly after the key is released, because a
     /// word still being spoken at that moment would otherwise be cut off.
     private func recordTail() async {
