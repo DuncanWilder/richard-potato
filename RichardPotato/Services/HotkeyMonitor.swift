@@ -11,6 +11,7 @@ import Foundation
 final class HotkeyMonitor {
     var onPress: () -> Void = {}
     var onRelease: () -> Void = {}
+    var onCancel: () -> Void = {}
     /// Reports whether the event tap is installed, which requires Accessibility
     /// permission. Called on the main queue.
     var onTapStateChange: (Bool) -> Void = { _ in }
@@ -22,7 +23,7 @@ final class HotkeyMonitor {
     private var tap: CFMachPort?
     private var source: CFRunLoopSource?
     private var thread: Thread?
-    private var isHeld = false
+    private var gesture = HotkeyGesture()
     private var didReportUntrusted = false
 
     var isTapInstalled: Bool {
@@ -175,24 +176,17 @@ final class HotkeyMonitor {
             }
         }()
 
-        if shortcut.matchesPress(
-            type: eventType, keyCode: keyCode, flags: flags, isARepeat: isARepeat)
-        {
-            if !isHeld {
-                isHeld = true
-                Log.hotkey.info("Shortcut pressed (keyCode: \(keyCode))")
-                DispatchQueue.main.async { self.onPress() }
+        let action = gesture.handle(
+            shortcut: shortcut, type: eventType, keyCode: keyCode, flags: flags,
+            isARepeat: isARepeat)
+        if let action {
+            DispatchQueue.main.async {
+                switch action {
+                case .press: self.onPress()
+                case .release: self.onRelease()
+                case .cancel: self.onCancel()
+                }
             }
-            return nil
-        }
-
-        if shortcut.matchesRelease(type: eventType, keyCode: keyCode, flags: flags) {
-            if isHeld {
-                isHeld = false
-                Log.hotkey.info("Shortcut released (keyCode: \(keyCode))")
-                DispatchQueue.main.async { self.onRelease() }
-            }
-            return nil
         }
 
         return Unmanaged.passUnretained(event)

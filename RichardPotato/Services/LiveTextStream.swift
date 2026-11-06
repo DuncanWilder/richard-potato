@@ -30,6 +30,11 @@ final class LiveTextStream {
         inserted = target
     }
 
+    func cancel() {
+        inserted = ""
+        isActive = false
+    }
+
     func finish(with text: String) {
         update(to: text)
         inserted = ""
