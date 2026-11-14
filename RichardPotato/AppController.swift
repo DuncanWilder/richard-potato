@@ -28,12 +28,13 @@ final class AppController: ObservableObject {
     private var cancellables: Set<AnyCancellable> = []
     private var pipeline: Task<Void, Never>?
     private var didStart = false
-    // Buffer typing until release: a later key can invalidate the whole held gesture.
-    private var hotkeyHeld = false
+    private var guardTask: Task<Void, Never>?
     private var stopOnRelease = false
     private var captureRequested = false
     private final class CaptureAcceptance {
         var discarded = false
+        var guardEnded = false
+        let guardDeadline = ProcessInfo.processInfo.systemUptime + HotkeyGesture.guardDuration
     }
     private var acceptance: CaptureAcceptance?
 
@@ -129,7 +130,6 @@ final class AppController: ObservableObject {
 
     func handlePress() {
         if store.isRecording { return }
-        hotkeyHeld = true
         Log.hotkey.info("Handling press in \(self.store.activationMode.rawValue) mode")
         switch store.activationMode {
         case .hold:
@@ -144,7 +144,9 @@ final class AppController: ObservableObject {
     }
 
     func handleRelease() {
-        hotkeyHeld = false
+        guardTask?.cancel()
+        acceptance?.guardEnded = true
+        live.allowInsertion()
         if store.activationMode == .hold || stopOnRelease {
             stopOnRelease = false
             stopDictation()
@@ -154,7 +156,12 @@ final class AppController: ObservableObject {
     }
 
     private func cancelHotkeyCapture() {
-        hotkeyHeld = false
+        // A second toggle gesture must not discard text that is already live.
+        if acceptance?.guardEnded == true {
+            handleRelease()
+            return
+        }
+        guardTask?.cancel()
         stopOnRelease = false
         captureRequested = false
         acceptance?.discarded = true
@@ -172,6 +179,7 @@ final class AppController: ObservableObject {
         captureRequested = true
         let acceptance = CaptureAcceptance()
         self.acceptance = acceptance
+        guardTask?.cancel()
         // Starting again should not wait out the previous dictation's tail.
         engine.endTailEarly()
         enqueue { [self] in
@@ -179,6 +187,15 @@ final class AppController: ObservableObject {
             Log.dictation.info("Starting capture (engine ready: \(self.engine.isReady))")
             if store.insertionMethod == .typing {
                 live.begin()
+                if acceptance.guardEnded { live.allowInsertion() }
+                guardTask = Task { [weak self] in
+                    let delay = max(
+                        0, acceptance.guardDeadline - ProcessInfo.processInfo.systemUptime)
+                    try? await Task.sleep(for: .seconds(delay))
+                    guard !Task.isCancelled, !acceptance.discarded else { return }
+                    acceptance.guardEnded = true
+                    self?.live.allowInsertion()
+                }
             }
             captureStartedAt = Date()
             engine.beginCapture()
@@ -258,7 +275,7 @@ final class AppController: ObservableObject {
     private func streamTranscript() {
         // Keyed to the live stream rather than `isCapturing` so words spoken
         // into the tail keep appearing after the key is released.
-        guard !hotkeyHeld, acceptance?.discarded == false,
+        guard acceptance?.discarded == false,
             store.insertionMethod == .typing, live.isActive
         else { return }
         live.update(to: store.correct(engine.displayedText))
