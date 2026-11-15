@@ -90,4 +90,34 @@ struct HotkeyGestureTests {
         #expect(
             gesture.handle(shortcut: shortcut, type: .keyUp, keyCode: 40, flags: []) == nil)
     }
+    @Test(
+        "Keys and modifiers after the guard cannot cancel or suppress release",
+        arguments: [NSEvent.EventType.keyDown, .flagsChanged])
+    func lateKey(type: NSEvent.EventType) {
+        var gesture = HotkeyGesture()
+        _ = gesture.handle(
+            shortcut: command, type: .flagsChanged, keyCode: 55,
+            flags: .command, now: 10)
+        #expect(
+            gesture.handle(
+                shortcut: command, type: type, keyCode: 56,
+                flags: [.command, .shift], now: 10 + HotkeyGesture.guardDuration + 0.001) == nil)
+        #expect(
+            gesture.handle(
+                shortcut: command, type: .flagsChanged, keyCode: 55,
+                flags: [], now: 11) == .release)
+    }
+
+    @Test("A key just inside the guard cancels")
+    func insideDeadline() {
+        var gesture = HotkeyGesture()
+        _ = gesture.handle(
+            shortcut: command, type: .flagsChanged, keyCode: 55,
+            flags: .command, now: 10)
+        #expect(
+            gesture.handle(
+                shortcut: command, type: .keyDown, keyCode: 49,
+                flags: .command, now: 10 + HotkeyGesture.guardDuration - 0.001) == .cancel)
+    }
+
 }
