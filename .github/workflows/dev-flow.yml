@@ -1,0 +1,45 @@
+name: Dev-flow guardrails
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4.4.0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Script fixture tests
+        run: python3 scripts/ci/test-checks.py
+      - name: Exact dependency pins
+        run: python3 scripts/ci/check-pins.py .
+      - name: Conventional PR title
+        if: github.event_name == 'pull_request'
+        run: python3 scripts/ci/check-title.py "$GITHUB_EVENT_PATH"
+      - name: Required verification
+        if: github.event_name == 'pull_request'
+        run: python3 scripts/ci/check-verification.py "$GITHUB_EVENT_PATH"
+      - name: PR evidence images
+        if: github.event_name == 'pull_request'
+        run: python3 scripts/ci/check-images.py "$GITHUB_EVENT_PATH"
+      - name: Performance measurements
+        if: github.event_name == 'pull_request'
+        run: python3 scripts/ci/check-perf.py "$GITHUB_EVENT_PATH"
+      - name: Diff guardrails
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          git diff --no-ext-diff --unified=0 "$BASE_SHA...$HEAD_SHA" > /tmp/pr.diff
+          python3 scripts/ci/check-guardrails.py /tmp/pr.diff
