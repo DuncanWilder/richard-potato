@@ -16,6 +16,12 @@ enum InsertionMethod: String, Codable, CaseIterable, Identifiable {
 }
 
 enum TextInserter {
+    /// Apply this only to the final transcript, after corrections and refinement.
+    static func finalText(_ text: String, addSpace: Bool) -> String {
+        guard addSpace, let last = text.last, !last.isWhitespace else { return text }
+        return text + " "
+    }
+
     /// Marks events we post ourselves so the hotkey tap can ignore them.
     static let syntheticEventTag: Int64 = 0x5269_4368
 

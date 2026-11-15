@@ -21,6 +21,8 @@ struct PreferencesStoreTests {
             store.activationMode = .toggle
             store.microphoneUID = "test microphone"
             store.insertionMethod = .paste
+            #expect(!store.addSpaceAfterDictation)
+            store.addSpaceAfterDictation = true
             store.postProcessTranscript = true
             store.showListeningIndicator = false
             store.corrections = [TextCorrection(heard: "potato", written: "🥔")]
@@ -32,10 +34,24 @@ struct PreferencesStoreTests {
             #expect(restored.activationMode == .toggle)
             #expect(restored.microphoneUID == "test microphone")
             #expect(restored.insertionMethod == .paste)
+            #expect(restored.addSpaceAfterDictation)
             #expect(restored.postProcessTranscript)
             #expect(!restored.showListeningIndicator)
             #expect(restored.corrections == store.corrections)
             #expect(restored.storageMessage == nil)
+        }
+    }
+
+    @Test("Existing settings without the space option default to off")
+    @MainActor func oldSettings() throws {
+        try withFile { url in
+            let data = try JSONEncoder().encode(StoredSettings())
+            var json = try #require(JSONSerialization.jsonObject(with: data) as? [String: Any])
+            json.removeValue(forKey: "addSpaceAfterDictation")
+            try JSONSerialization.data(withJSONObject: json).write(to: url)
+            let store = PreferencesStore(fileURL: url, legacyDomains: [])
+            #expect(!store.addSpaceAfterDictation)
+            #expect(store.storageMessage == nil)
         }
     }
 

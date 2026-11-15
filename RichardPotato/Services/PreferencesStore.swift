@@ -13,6 +13,7 @@ final class PreferencesStore: ObservableObject {
     @Published var activationMode: ActivationMode
     @Published var microphoneUID: String?
     @Published var insertionMethod: InsertionMethod
+    @Published var addSpaceAfterDictation: Bool
     @Published var postProcessTranscript: Bool
     @Published var showListeningIndicator: Bool
     @Published var corrections: [TextCorrection]
@@ -53,6 +54,7 @@ final class PreferencesStore: ObservableObject {
         activationMode = settings.activationMode
         microphoneUID = settings.microphoneUID
         insertionMethod = settings.insertionMethod
+        addSpaceAfterDictation = settings.addSpaceAfterDictation ?? false
         postProcessTranscript = settings.postProcessTranscript
         showListeningIndicator = settings.showListeningIndicator
         corrections = settings.corrections
@@ -65,6 +67,7 @@ final class PreferencesStore: ObservableObject {
         settings.activationMode = activationMode
         settings.microphoneUID = microphoneUID
         settings.insertionMethod = insertionMethod
+        settings.addSpaceAfterDictation = addSpaceAfterDictation
         settings.postProcessTranscript = postProcessTranscript
         settings.showListeningIndicator = showListeningIndicator
         settings.corrections = corrections
