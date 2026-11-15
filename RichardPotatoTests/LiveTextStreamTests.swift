@@ -80,4 +80,68 @@ struct LiveTextStreamTests {
                 flags: [], now: 1) == .release)
     }
 
+    @Test("Only the final live result gets a space, once per session")
+    func finalSpace() {
+        var output = ""
+        let stream = LiveTextStream(
+            typeText: { output += $0 },
+            deleteText: { output.removeLast($0) })
+        for word in ["hello", "world"] {
+            stream.begin()
+            stream.allowInsertion()
+            stream.update(to: String(word.prefix(2)))
+            #expect(!output.hasSuffix(" "))
+            stream.update(to: word)
+            #expect(output.hasSuffix(word))
+            stream.finish(with: word, addSpace: true)
+            stream.finish(with: word, addSpace: true)
+        }
+        #expect(output == "hello world ")
+    }
+
+    @Test(
+        "Final output preserves empty text and existing whitespace",
+        arguments: ["", " ", "hello ", "hello\n", "hello\t", "hello\u{00A0}"])
+    func unchangedFinalText(text: String) {
+        #expect(TextInserter.finalText(text, addSpace: true) == text)
+        var output = ""
+        let stream = LiveTextStream(
+            typeText: { output += $0 },
+            deleteText: { output.removeLast($0) })
+        stream.begin()
+        stream.finish(with: text, addSpace: true)
+        #expect(output == String(text.drop { $0.isWhitespace }))
+    }
+
+    @Test("The option controls the final paste text")
+    func pasteText() {
+        #expect(TextInserter.finalText("hello", addSpace: true) == "hello ")
+        #expect(TextInserter.finalText("hello", addSpace: false) == "hello")
+    }
+
+    @Test("Disabled space leaves live text unchanged")
+    func disabledSpace() {
+        var output = ""
+        let stream = LiveTextStream(typeText: { output += $0 }, deleteText: { _ in })
+        stream.begin()
+        stream.update(to: "hello")
+        stream.finish(with: "hello", addSpace: false)
+        #expect(output == "hello")
+    }
+
+    @Test(
+        "Cancelled sessions cannot add a space or accept a late final result",
+        arguments: [false, true])
+    func cancelledSpace(guardEnded: Bool) {
+        var output = ""
+        let stream = LiveTextStream(typeText: { output += $0 }, deleteText: { _ in })
+        stream.begin()
+        stream.update(to: "hello")
+        if guardEnded { stream.allowInsertion() }
+        stream.cancel()
+        stream.finish(with: "hello", addSpace: true)
+        #expect(output == (guardEnded ? "hello" : ""))
+        #expect(!stream.isActive)
+    }
+
 }

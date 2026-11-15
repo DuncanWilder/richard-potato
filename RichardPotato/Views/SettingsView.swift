@@ -46,6 +46,8 @@ struct SettingsView: View {
                     }
                 }
 
+                Toggle("Add a space after dictation", isOn: trailingSpaceBinding)
+
                 if controller.store.insertionMethod == .paste {
                     Toggle("Refine transcript before pasting", isOn: postProcessBinding)
                 }
@@ -145,6 +147,16 @@ struct SettingsView: View {
             get: { controller.store.microphoneUID ?? Self.systemDefaultTag },
             set: { uid in
                 controller.selectMicrophone(uid: uid == Self.systemDefaultTag ? nil : uid)
+            }
+        )
+    }
+
+    private var trailingSpaceBinding: Binding<Bool> {
+        Binding(
+            get: { controller.store.addSpaceAfterDictation },
+            set: { enabled in
+                controller.store.addSpaceAfterDictation = enabled
+                controller.store.save()
             }
         )
     }

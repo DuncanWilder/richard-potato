@@ -65,9 +65,10 @@ final class LiveTextStream {
         isActive = false
     }
 
-    func finish(with text: String) {
+    func finish(with text: String, addSpace: Bool = false) {
+        guard isActive else { return }
         allowInsertion()
-        update(to: text)
+        update(to: TextInserter.finalText(text, addSpace: addSpace))
         inserted = ""
         isActive = false
     }

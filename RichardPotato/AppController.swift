@@ -225,15 +225,19 @@ final class AppController: ObservableObject {
             switch store.insertionMethod {
             case .typing:
                 // Streamed while speaking; this settles the finalised tail.
-                live.finish(with: text)
+                live.finish(with: text, addSpace: store.addSpaceAfterDictation)
             case .paste:
                 if store.postProcessTranscript && !text.isEmpty {
                     let refined = await TranscriptRefiner.refine(text)
                     if !acceptance.discarded {
-                        TextInserter.insert(refined, using: .paste)
+                        TextInserter.insert(
+                            TextInserter.finalText(refined, addSpace: store.addSpaceAfterDictation),
+                            using: .paste)
                     }
                 } else {
-                    TextInserter.insert(text, using: .paste)
+                    TextInserter.insert(
+                        TextInserter.finalText(text, addSpace: store.addSpaceAfterDictation),
+                        using: .paste)
                 }
             }
             // Still inside the queued work, so the next press waits for it.

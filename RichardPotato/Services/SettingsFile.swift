@@ -12,6 +12,7 @@ struct StoredSettings: Codable, Equatable {
     var corrections: [TextCorrection] = []
 
     // Optional fields keep existing version 1 files compatible.
+    var addSpaceAfterDictation: Bool?
     var lastRecoveryBuild: String?
     var recoveredCorrections: [TextCorrection]?
 
