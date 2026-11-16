@@ -1,16 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-APP="${1:?Usage: stabilize-signature.sh /path/to/RichardPotato.app [identity]}"
-IDENTITY="${2:-${RICHARD_POTATO_IDENTITY:-Richard Potato Dev}}"
+APP="${1:?Usage: stabilize-signature.sh /path/to/RichardPotato.app}"
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 
 if [[ ! -d "$APP" ]]; then
   echo "App not found: $APP" >&2
-  exit 1
-fi
-
-if ! security find-identity -v -p codesigning | grep -qF "\"$IDENTITY\""; then
-  echo "Code-signing identity '$IDENTITY' is missing. Run ./scripts/setup-signing.sh once." >&2
   exit 1
 fi
 
@@ -22,11 +17,13 @@ if xattr -p com.apple.quarantine "$APP" >/dev/null 2>&1; then
   exit 1
 fi
 
-# Sign with one certificate so Debug and Release keep the same identity.
+# A fixed requirement keeps the app identity stable when the executable hash changes.
+# This identifies the app, not its author; ad hoc signing is not notarization.
 codesign --force \
-  --sign "$IDENTITY" \
+  --sign - \
+  --requirements "$ROOT/Resources/LocalCodeRequirement.txt" \
   --options runtime \
-  --entitlements "$(cd "$(dirname "$0")/.." && pwd)/RichardPotato/RichardPotato.entitlements" \
+  --entitlements "$ROOT/RichardPotato/RichardPotato.entitlements" \
   "$APP"
 
 codesign --verify --deep --strict --verbose=2 "$APP"
