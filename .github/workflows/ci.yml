@@ -15,7 +15,7 @@ jobs:
     runs-on: macos-26
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4.4.0
       - name: Compile app
         shell: bash
         run: |
@@ -36,7 +36,7 @@ jobs:
     runs-on: macos-26
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4.4.0
       - name: Run Swift Testing suite
         run: ./scripts/test.sh --configuration release
 
@@ -45,6 +45,6 @@ jobs:
     runs-on: macos-26
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4.4.0
       - name: Check Swift formatting
         run: ./scripts/format.sh

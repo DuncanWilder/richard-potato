@@ -40,7 +40,7 @@ Requires macOS 26 or later and Swift 6.2 or later with a compatible macOS SDK. T
 Run the same checks as CI with:
 
 ```bash
-./scripts/check.sh       # Debug and Release builds, tests, formatting, and metadata
+./scripts/check.sh       # Release build, tests, formatting, and metadata
 ./scripts/test.sh        # Swift Testing suite; accepts --filter
 ./scripts/format.sh      # Check formatting
 ./scripts/format.sh fix  # Apply formatting
@@ -60,6 +60,19 @@ Run `./scripts/setup-signing.sh` once to create a local code-signing certificate
 To publish a release, commit and push your changes, then run `./scripts/github-release.sh`. It asks for release notes and uploads the zip to a GitHub release tagged with the project version.
 
 The build script signs Debug and Release apps with the same certificate so macOS can retain their permission grants. A release from this local certificate is not Apple notarized. Recipients may need to right-click the app and select **Open** on first use.
+
+## Development guardrails
+
+PRs must use a Conventional Commit title and include a filled `## Verification`
+section. The [dev-flow checks](scripts/ci/README.md) check evidence image URLs,
+performance measurements, exact dependency pins, and changes that can weaken checks.
+Run `python3 scripts/ci/test-checks.py` to test their good and bad fixtures.
+
+Upload PR evidence with `gh pr create/edit --body-file ... --attach <file>`
+(gh 2.99.0 or later). Images must use GitHub user-attachment URLs.
+Keep code, comments, documentation, and fixtures free of personal names and
+machine names. Use neutral example identities. Keep required app identifiers
+and service URLs unchanged.
 
 ## Use
 

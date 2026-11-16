@@ -1,0 +1,613 @@
+[
+  {
+    "script": "title",
+    "name": "ci: dev-flow guardrails (reference implementation)",
+    "pass": true,
+    "pr": {
+      "title": "ci: dev-flow guardrails (reference implementation)"
+    }
+  },
+  {
+    "script": "title",
+    "name": "feat(ui)!: change",
+    "pass": true,
+    "pr": {
+      "title": "feat(ui)!: change"
+    }
+  },
+  {
+    "script": "title",
+    "name": "Fix stuff",
+    "pass": false,
+    "pr": {
+      "title": "Fix stuff"
+    }
+  },
+  {
+    "script": "title",
+    "name": "style: no",
+    "pass": false,
+    "pr": {
+      "title": "style: no"
+    }
+  },
+  {
+    "script": "title",
+    "name": "fix: ",
+    "pass": false,
+    "pr": {
+      "title": "fix: "
+    }
+  },
+  {
+    "script": "verification",
+    "name": "all required sections filled",
+    "pass": true,
+    "pr": {
+      "body": "## What and why\nCloses #19. Add checks.\n\n## Root cause\nN/A\n\n## Verification\n`./scripts/test.sh` passed. Running app: N/A for CI-only changes.\n\n## Screenshots\nN/A\n"
+    }
+  },
+  {
+    "script": "verification",
+    "name": "## Verification\n<!-- instructions -->",
+    "pass": false,
+    "pr": {
+      "body": "## Verification\n<!-- instructions -->"
+    }
+  },
+  {
+    "script": "verification",
+    "name": "## Summary\nworks",
+    "pass": false,
+    "pr": {
+      "body": "## Summary\nworks"
+    }
+  },
+  {
+    "script": "perf",
+    "name": "perf: faster| Metric | Before | After |\n| --- | --- | --- |\n| ms | 12 | 10 |",
+    "pass": true,
+    "pr": {
+      "title": "perf: faster",
+      "body": "| Metric | Before | After |\n| --- | --- | --- |\n| ms | 12 | 10 |"
+    }
+  },
+  {
+    "script": "perf",
+    "name": "perf(core)!: fasterBefore 12 after 10",
+    "pass": false,
+    "pr": {
+      "title": "perf(core)!: faster",
+      "body": "Before 12 after 10"
+    }
+  },
+  {
+    "script": "perf",
+    "name": "perf: faster| Before | After |\n| --- | --- |\n| TBD | TBD |",
+    "pass": false,
+    "pr": {
+      "title": "perf: faster",
+      "body": "| Before | After |\n| --- | --- |\n| TBD | TBD |"
+    }
+  },
+  {
+    "script": "perf",
+    "name": "fix: bug",
+    "pass": true,
+    "pr": {
+      "title": "fix: bug",
+      "body": ""
+    }
+  },
+  {
+    "script": "guardrails",
+    "name": "normal",
+    "pass": true,
+    "diff": "diff --git a/Tests.swift b/Tests.swift\n+let value = 1\n"
+  },
+  {
+    "script": "guardrails",
+    "name": "swift skip",
+    "pass": false,
+    "diff": "diff --git a/Tests.swift b/Tests.swift\n+@Test(.disabled(\"broken\"))\n"
+  },
+  {
+    "script": "guardrails",
+    "name": "swift enabled",
+    "pass": false,
+    "diff": "diff --git a/Tests.swift b/Tests.swift\n+@Test(.enabled(if: false))\n"
+  },
+  {
+    "script": "guardrails",
+    "name": "lint",
+    "pass": false,
+    "diff": "diff --git a/Tests.swift b/Tests.swift\n+// swiftlint:disable all\n"
+  },
+  {
+    "script": "guardrails",
+    "name": "python skip",
+    "pass": false,
+    "diff": "diff --git a/Tests.swift b/Tests.swift\n+@pytest.mark.skip(reason=\"broken\")\n"
+  },
+  {
+    "script": "guardrails",
+    "name": "js skip",
+    "pass": false,
+    "diff": "diff --git a/Tests.swift b/Tests.swift\n+test.skip(\"broken\")\n"
+  },
+  {
+    "script": "guardrails",
+    "name": "ignore",
+    "pass": false,
+    "diff": "diff --git a/Tests.swift b/Tests.swift\n+// eslint-disable-next-line\n"
+  },
+  {
+    "script": "guardrails",
+    "name": "removed workflow",
+    "pass": false,
+    "diff": "diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml\n-        run: ./scripts/test.sh\n"
+  },
+  {
+    "script": "guardrails",
+    "name": "bypass",
+    "pass": false,
+    "diff": "diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml\n+        continue-on-error: true\n"
+  },
+  {
+    "script": "guardrails",
+    "name": "pin upgrade",
+    "pass": true,
+    "diff": "diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml\n-      - uses: actions/checkout@v4\n+      - uses: actions/checkout@v4.4.0\n"
+  },
+  {
+    "script": "pins",
+    "name": "empty dependencies",
+    "pass": true
+  },
+  {
+    "script": "pins",
+    "name": "exact dependency",
+    "pass": true,
+    "manifest": ".package(url: \"https://example.com/pkg\", exact: \"1.2.3\")"
+  },
+  {
+    "script": "pins",
+    "name": "revision dependency",
+    "pass": true,
+    "manifest": ".package(url: \"https://example.com/pkg\", revision: \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\")"
+  },
+  {
+    "script": "pins",
+    "name": "range",
+    "pass": false,
+    "manifest": ".package(url: \"https://example.com/pkg\", from: \"1.2.3\")"
+  },
+  {
+    "script": "pins",
+    "name": "branch",
+    "pass": false,
+    "manifest": ".package(url: \"https://example.com/pkg\", branch: \"main\")"
+  },
+  {
+    "script": "pins",
+    "name": "missing lock",
+    "pass": false,
+    "lock": false
+  },
+  {
+    "script": "pins",
+    "name": "untracked lock",
+    "pass": false,
+    "tracked": false
+  },
+  {
+    "script": "pins",
+    "name": "floating major action tag",
+    "pass": false,
+    "workflow": "- uses: actions/checkout@v4"
+  },
+  {
+    "script": "pins",
+    "name": "legacy exact",
+    "pass": true,
+    "manifest": ".package(url: \"https://example.com/pkg\", .exact(\"1.2.3\"))"
+  },
+  {
+    "script": "pins",
+    "name": "flow action tag",
+    "pass": false,
+    "workflow": "steps: [{uses: actions/checkout@v4}]"
+  },
+  {
+    "script": "guardrails",
+    "name": "new disabled rules",
+    "pass": false,
+    "diff": "diff --git a/.swiftlint.yml b/.swiftlint.yml\n+disabled_rules: [all]\n"
+  },
+  {
+    "script": "guardrails",
+    "name": "format disabled",
+    "pass": false,
+    "diff": "diff --git a/.swift-format b/.swift-format\n+\"enabled\": false\n"
+  },
+  {
+    "script": "guardrails",
+    "name": "deleted script",
+    "pass": false,
+    "diff": "diff --git a/scripts/ci/check.py b/scripts/ci/check.py\n-print(\"check\")\n"
+  },
+  {
+    "script": "pins",
+    "name": "action ref v2.0.0",
+    "pass": true,
+    "workflow": "- uses: actions/add-to-project@v2.0.0"
+  },
+  {
+    "script": "pins",
+    "name": "action ref v0.0.0",
+    "pass": true,
+    "workflow": "- uses: actions/add-to-project@v0.0.0"
+  },
+  {
+    "script": "pins",
+    "name": "action ref v2",
+    "pass": false,
+    "workflow": "- uses: actions/add-to-project@v2"
+  },
+  {
+    "script": "pins",
+    "name": "action ref v2.0",
+    "pass": false,
+    "workflow": "- uses: actions/add-to-project@v2.0"
+  },
+  {
+    "script": "pins",
+    "name": "action ref main",
+    "pass": false,
+    "workflow": "- uses: actions/add-to-project@main"
+  },
+  {
+    "script": "pins",
+    "name": "action ref master",
+    "pass": false,
+    "workflow": "- uses: actions/add-to-project@master"
+  },
+  {
+    "script": "pins",
+    "name": "action ref latest",
+    "pass": false,
+    "workflow": "- uses: actions/add-to-project@latest"
+  },
+  {
+    "script": "pins",
+    "name": "action ref aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "pass": false,
+    "workflow": "- uses: actions/add-to-project@aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  {
+    "script": "pins",
+    "name": "action ref v02.0.0",
+    "pass": false,
+    "workflow": "- uses: actions/add-to-project@v02.0.0"
+  },
+  {
+    "script": "pins",
+    "name": "action ref v2.0.0-beta",
+    "pass": false,
+    "workflow": "- uses: actions/add-to-project@v2.0.0-beta"
+  },
+  {
+    "script": "pins",
+    "name": "action ref v2.0.0+build",
+    "pass": false,
+    "workflow": "- uses: actions/add-to-project@v2.0.0+build"
+  },
+  {
+    "script": "pins",
+    "name": "action ref 2.0.0",
+    "pass": false,
+    "workflow": "- uses: actions/add-to-project@2.0.0"
+  },
+  {
+    "script": "pins",
+    "name": "flow exact action tag",
+    "pass": true,
+    "workflow": "steps: [{uses: actions/checkout@v4.4.0}]"
+  },
+  {
+    "script": "images",
+    "name": "no images",
+    "pass": true,
+    "pr": {
+      "body": "Tests passed."
+    }
+  },
+  {
+    "script": "images",
+    "name": "attached markdown",
+    "pass": true,
+    "pr": {
+      "body": "![Screenshot](https://github.com/user-attachments/assets/example-image)"
+    }
+  },
+  {
+    "script": "images",
+    "name": "markdown title",
+    "pass": true,
+    "pr": {
+      "body": "![Screenshot](<https://github.com/user-attachments/assets/example-image> \"Preview\")"
+    }
+  },
+  {
+    "script": "images",
+    "name": "attached html",
+    "pass": true,
+    "pr": {
+      "body": "<img src=\"https://github.com/user-attachments/assets/example-image\" width=\"800\">"
+    }
+  },
+  {
+    "script": "images",
+    "name": "uppercase html",
+    "pass": true,
+    "pr": {
+      "body": "<IMG SRC=\"https://github.com/user-attachments/assets/example-image\" />"
+    }
+  },
+  {
+    "script": "images",
+    "name": "raw markdown",
+    "pass": false,
+    "pr": {
+      "body": "![Screenshot](https://raw.githubusercontent.com/example/repo/evidence/image.png)"
+    }
+  },
+  {
+    "script": "images",
+    "name": "relative",
+    "pass": false,
+    "pr": {
+      "body": "![Screenshot](images/screen.png)"
+    }
+  },
+  {
+    "script": "images",
+    "name": "local",
+    "pass": false,
+    "pr": {
+      "body": "![Screenshot](/tmp/screen.png)"
+    }
+  },
+  {
+    "script": "images",
+    "name": "file URL",
+    "pass": false,
+    "pr": {
+      "body": "<img src=\"file:///tmp/screen.png\">"
+    }
+  },
+  {
+    "script": "images",
+    "name": "raw html",
+    "pass": false,
+    "pr": {
+      "body": "<img src=\"https://raw.githubusercontent.com/example/repo/evidence/image.png\">"
+    }
+  },
+  {
+    "script": "images",
+    "name": "wrong host",
+    "pass": false,
+    "pr": {
+      "body": "![Screenshot](https://github.com.example.com/user-attachments/assets/example-image)"
+    }
+  },
+  {
+    "script": "images",
+    "name": "wrong path",
+    "pass": false,
+    "pr": {
+      "body": "![Screenshot](https://github.com/example/repo/image.png)"
+    }
+  },
+  {
+    "script": "images",
+    "name": "http",
+    "pass": false,
+    "pr": {
+      "body": "![Screenshot](http://github.com/user-attachments/assets/example-image)"
+    }
+  },
+  {
+    "script": "images",
+    "name": "missing src",
+    "pass": false,
+    "pr": {
+      "body": "<img alt=\"Screenshot\">"
+    }
+  },
+  {
+    "script": "images",
+    "name": "empty markdown",
+    "pass": false,
+    "pr": {
+      "body": "![Screenshot]()"
+    }
+  },
+  {
+    "script": "images",
+    "name": "mixed images",
+    "pass": false,
+    "pr": {
+      "body": "![Good](https://github.com/user-attachments/assets/example-image)\n![Bad](image.png)"
+    }
+  },
+  {
+    "script": "images",
+    "name": "reference",
+    "pass": true,
+    "pr": {
+      "body": "![Screenshot][evidence]\n\n[evidence]: https://github.com/user-attachments/assets/example-image"
+    }
+  },
+  {
+    "script": "images",
+    "name": "bad reference",
+    "pass": false,
+    "pr": {
+      "body": "![Screenshot][evidence]\n\n[evidence]: image.png"
+    }
+  },
+  {
+    "script": "images",
+    "name": "shortcut",
+    "pass": true,
+    "pr": {
+      "body": "![evidence]\n\n[evidence]: https://github.com/user-attachments/assets/example-image"
+    }
+  },
+  {
+    "script": "images",
+    "name": "srcset external",
+    "pass": false,
+    "pr": {
+      "body": "<img src=\"https://github.com/user-attachments/assets/example-image\" srcset=\"https://example.com/image.png 2x\">"
+    }
+  },
+  {
+    "script": "images",
+    "name": "attached srcset",
+    "pass": true,
+    "pr": {
+      "body": "<img src=\"https://github.com/user-attachments/assets/example-image\" srcset=\"https://github.com/user-attachments/assets/example-image 2x\">"
+    }
+  },
+  {
+    "script": "images",
+    "name": "protocol relative",
+    "pass": false,
+    "pr": {
+      "body": "<img src=\"//github.com/user-attachments/assets/image\">"
+    }
+  },
+  {
+    "script": "guardrails",
+    "name": "removed check script enforcement",
+    "pass": false,
+    "diff": "diff --git a/scripts/check.sh b/scripts/check.sh\n-set -euo pipefail\n"
+  },
+  {
+    "script": "guardrails",
+    "name": "removed test script enforcement",
+    "pass": false,
+    "diff": "diff --git a/scripts/test.sh b/scripts/test.sh\n-set -euo pipefail\n"
+  },
+  {
+    "script": "guardrails",
+    "name": "removed format script enforcement",
+    "pass": false,
+    "diff": "diff --git a/scripts/format.sh b/scripts/format.sh\n-set -euo pipefail\n"
+  },
+  {
+    "script": "guardrails",
+    "name": "removed toolchain script enforcement",
+    "pass": false,
+    "diff": "diff --git a/scripts/toolchain.sh b/scripts/toolchain.sh\n-set -euo pipefail\n"
+  },
+  {
+    "script": "verification",
+    "name": "missing What and why",
+    "pass": false,
+    "pr": {
+      "body": "### What and why\nCloses #19. Add checks.\n\n## Root cause\nN/A\n\n## Verification\n`./scripts/test.sh` passed. Running app: N/A for CI-only changes.\n\n## Screenshots\nN/A\n"
+    }
+  },
+  {
+    "script": "verification",
+    "name": "comment-only What and why",
+    "pass": false,
+    "pr": {
+      "body": "## What and why\n<!-- Fill this in -->\n\n## Root cause\nN/A\n\n## Verification\n`./scripts/test.sh` passed. Running app: N/A for CI-only changes.\n\n## Screenshots\nN/A\n"
+    }
+  },
+  {
+    "script": "verification",
+    "name": "missing Root cause",
+    "pass": false,
+    "pr": {
+      "body": "## What and why\nCloses #19. Add checks.\n\n### Root cause\nN/A\n\n## Verification\n`./scripts/test.sh` passed. Running app: N/A for CI-only changes.\n\n## Screenshots\nN/A\n"
+    }
+  },
+  {
+    "script": "verification",
+    "name": "comment-only Root cause",
+    "pass": false,
+    "pr": {
+      "body": "## What and why\nCloses #19. Add checks.\n\n## Root cause\n<!-- Fill this in -->\n\n## Verification\n`./scripts/test.sh` passed. Running app: N/A for CI-only changes.\n\n## Screenshots\nN/A\n"
+    }
+  },
+  {
+    "script": "verification",
+    "name": "missing Verification",
+    "pass": false,
+    "pr": {
+      "body": "## What and why\nCloses #19. Add checks.\n\n## Root cause\nN/A\n\n### Verification\n`./scripts/test.sh` passed. Running app: N/A for CI-only changes.\n\n## Screenshots\nN/A\n"
+    }
+  },
+  {
+    "script": "verification",
+    "name": "comment-only Verification",
+    "pass": false,
+    "pr": {
+      "body": "## What and why\nCloses #19. Add checks.\n\n## Root cause\nN/A\n\n## Verification\n<!-- Fill this in -->\n\n## Screenshots\nN/A\n"
+    }
+  },
+  {
+    "script": "verification",
+    "name": "missing Screenshots",
+    "pass": false,
+    "pr": {
+      "body": "## What and why\nCloses #19. Add checks.\n\n## Root cause\nN/A\n\n## Verification\n`./scripts/test.sh` passed. Running app: N/A for CI-only changes.\n\n### Screenshots\nN/A\n"
+    }
+  },
+  {
+    "script": "verification",
+    "name": "comment-only Screenshots",
+    "pass": false,
+    "pr": {
+      "body": "## What and why\nCloses #19. Add checks.\n\n## Root cause\nN/A\n\n## Verification\n`./scripts/test.sh` passed. Running app: N/A for CI-only changes.\n\n## Screenshots\n<!-- Fill this in -->\n"
+    }
+  },
+  {
+    "script": "verification",
+    "name": "wrong section order",
+    "pass": false,
+    "pr": {
+      "body": "## What and why\nCloses #19. Add checks.\n\n## Screenshots\nN/A\n\n## Verification\n`./scripts/test.sh` passed. Running app: N/A for CI-only changes.\n\n## Root cause\nN/A\n"
+    }
+  },
+  {
+    "script": "verification",
+    "name": "changelog section",
+    "pass": false,
+    "pr": {
+      "body": "## What and why\nCloses #19. Add checks.\n\n## Root cause\nN/A\n\n## Verification\n`./scripts/test.sh` passed. Running app: N/A for CI-only changes.\n\n## Screenshots\nN/A\n\n## Changelog\nExtra\n"
+    }
+  },
+  {
+    "script": "verification",
+    "name": "duplicate section",
+    "pass": false,
+    "pr": {
+      "body": "## What and why\nCloses #19. Add checks.\n\n## Root cause\nN/A\n\n## Verification\n`./scripts/test.sh` passed. Running app: N/A for CI-only changes.\n\n## Screenshots\nN/A\n\n## Verification\nPassed\n"
+    }
+  },
+  {
+    "script": "verification",
+    "name": "headings inside comment",
+    "pass": false,
+    "pr": {
+      "body": "<!--\n## What and why\nCloses #19. Add checks.\n\n## Root cause\nN/A\n\n## Verification\n`./scripts/test.sh` passed. Running app: N/A for CI-only changes.\n\n## Screenshots\nN/A\n\n-->"
+    }
+  }
+]
