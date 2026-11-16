@@ -50,7 +50,7 @@ CI runs these checks on macOS 26 for pull requests and pushes to `main`. It comp
 
 Run `swift build` to check compilation. The scripts below also create the app bundle, add its icon and privacy descriptions, and sign it.
 
-Run `./scripts/setup-signing.sh` once to create a local code-signing certificate in your login keychain. This step changes the keychain and may ask for your password. Builds stop if the certificate is missing.
+No signing certificate or keychain setup is needed.
 
 ```bash
 ./scripts/dev.sh      # Build and open the app
@@ -59,7 +59,9 @@ Run `./scripts/setup-signing.sh` once to create a local code-signing certificate
 
 To publish a release, commit and push your changes, then run `./scripts/github-release.sh`. It asks for release notes and uploads the zip to a GitHub release tagged with the project version.
 
-The build script signs Debug and Release apps with the same certificate so macOS can retain their permission grants. A release from this local certificate is not Apple notarized. Recipients may need to right-click the app and select **Open** on first use.
+The build script signs Debug and Release apps ad hoc (`codesign --sign -`) with a fixed designated requirement in `Resources/LocalCodeRequirement.txt`. It keeps the hardened runtime and audio-input entitlement. The requirement uses the bundle ID and requires a bundle version, so it stays the same across rebuilds. It identifies the app, not its author. These builds are not Apple notarized. Recipients may need to right-click the app and select **Open** on first use.
+
+The change from certificate signing can require a one-time re-grant of Microphone, Speech Recognition, and Accessibility access. Check permissions after the first launch, then rebuild and check them again. Do not reset existing permissions to test this change. The app uses on-device `SpeechAnalyzer`; it does not request authorization through the older `SFSpeechRecognizer` API.
 
 ## Development guardrails
 

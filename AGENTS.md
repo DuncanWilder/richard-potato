@@ -38,7 +38,7 @@ To check compilation without opening the app or signing a bundle, run:
 swift build
 ```
 
-The views use `ViewState`, an alias for the SwiftUI `State` property wrapper, because the macOS 27 command-line tools do not include the new `State` macro plugin. `scripts/build.sh [debug|release]` compiles the executable, creates the app bundle and icon, and runs `scripts/stabilize-signature.sh`. The app version and privacy descriptions are in `Resources/Info.plist`. Both dev and release builds use the `Richard Potato Dev` certificate and remove quarantine. Do not remove these signing steps. The certificate must exist before app packaging can finish. `./scripts/setup-signing.sh` changes the login keychain; do not run it as part of a normal build check.
+The views use `ViewState`, an alias for the SwiftUI `State` property wrapper, because the macOS 27 command-line tools do not include the new `State` macro plugin. `scripts/build.sh [debug|release]` compiles the executable, creates the app bundle and icon, and runs `scripts/stabilize-signature.sh`. The app version and privacy descriptions are in `Resources/Info.plist`. Both dev and release builds use ad hoc signing with the fixed designated requirement in `Resources/LocalCodeRequirement.txt`, preserve the hardened runtime and audio-input entitlement, and remove quarantine. Do not remove these signing steps. No signing certificate or keychain setup is needed.
 
 For a manual check, open the built app, grant Microphone and Accessibility access, and check the shortcut, both activation modes, both text output modes, Settings, and Analytics. A build alone does not verify these actions. The app can install an Apple on-device speech model during setup.
 
