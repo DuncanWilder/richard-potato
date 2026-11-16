@@ -34,6 +34,17 @@ if [[ -z "$notes" ]]; then
 fi
 [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "Invalid release version" >&2; exit 1; }
 [[ -s "$notes" ]] || { echo "Release notes are empty" >&2; exit 1; }
+check_clean_tree() {
+  local status
+  status="$(git status --porcelain)"
+  if [[ -n "$status" ]]; then
+    echo "Commit changes before publishing" >&2
+    printf '%s\n' "$status" >&2
+    exit 1
+  fi
+}
+# All modes enforce the publishing invariant, including the PR smoke test.
+check_clean_tree
 if [[ "$plan_only" == true ]]; then
   printf 'Planned release: v%s\n' "$version"
   cat "$notes"
@@ -43,7 +54,6 @@ tag="v$version"
 commit="$(git rev-parse HEAD)"
 if [[ "$dry_run" == false ]]; then
   command -v gh >/dev/null
-  [[ -z "$(git status --porcelain)" ]] || { echo "Commit changes before publishing" >&2; exit 1; }
   # A queued merge can already be behind the remote tip. Verify reachability,
   # rather than requiring a remote branch to point at this exact commit.
   git fetch origin
@@ -57,6 +67,7 @@ if [[ "$dry_run" == false ]]; then
 fi
 
 RELEASE_VERSION="$version" RELEASE_NO_OPEN=true ./scripts/release.sh
+check_clean_tree
 archive="$ROOT/dist/Richard-Potato-$version.zip"
 [[ -s "$archive" ]] || { echo "Release archive is missing: $archive" >&2; exit 1; }
 if [[ "$dry_run" == true ]]; then
