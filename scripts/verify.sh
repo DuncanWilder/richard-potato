@@ -65,7 +65,11 @@ if [[ $# == 3 ]]; then
   done
   if kill -0 "$AUDIO_PID" 2>/dev/null; then
     kill "$AUDIO_PID"
-    wait "$AUDIO_PID" || true
+    if wait "$AUDIO_PID"; then
+      echo "Recognizer exited during timeout cleanup."
+    else
+      echo "Recognizer stopped with status $? during timeout cleanup."
+    fi
     echo "Silent recognition timed out; see audio.txt." >&2
     exit 1
   fi
