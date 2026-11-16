@@ -41,10 +41,10 @@
   },
   {
     "script": "verification",
-    "name": "## Verification\n`./scripts/test.sh` passed.",
+    "name": "all required sections filled",
     "pass": true,
     "pr": {
-      "body": "## Verification\n`./scripts/test.sh` passed."
+      "body": "## What and why\nCloses #19. Add checks.\n\n## Root cause\nN/A\n\n## Verification\n`./scripts/test.sh` passed. Running app: N/A for CI-only changes.\n\n## Screenshots\nN/A\n"
     }
   },
   {
@@ -513,5 +513,101 @@
     "name": "removed toolchain script enforcement",
     "pass": false,
     "diff": "diff --git a/scripts/toolchain.sh b/scripts/toolchain.sh\n-set -euo pipefail\n"
+  },
+  {
+    "script": "verification",
+    "name": "missing What and why",
+    "pass": false,
+    "pr": {
+      "body": "### What and why\nCloses #19. Add checks.\n\n## Root cause\nN/A\n\n## Verification\n`./scripts/test.sh` passed. Running app: N/A for CI-only changes.\n\n## Screenshots\nN/A\n"
+    }
+  },
+  {
+    "script": "verification",
+    "name": "comment-only What and why",
+    "pass": false,
+    "pr": {
+      "body": "## What and why\n<!-- Fill this in -->\n\n## Root cause\nN/A\n\n## Verification\n`./scripts/test.sh` passed. Running app: N/A for CI-only changes.\n\n## Screenshots\nN/A\n"
+    }
+  },
+  {
+    "script": "verification",
+    "name": "missing Root cause",
+    "pass": false,
+    "pr": {
+      "body": "## What and why\nCloses #19. Add checks.\n\n### Root cause\nN/A\n\n## Verification\n`./scripts/test.sh` passed. Running app: N/A for CI-only changes.\n\n## Screenshots\nN/A\n"
+    }
+  },
+  {
+    "script": "verification",
+    "name": "comment-only Root cause",
+    "pass": false,
+    "pr": {
+      "body": "## What and why\nCloses #19. Add checks.\n\n## Root cause\n<!-- Fill this in -->\n\n## Verification\n`./scripts/test.sh` passed. Running app: N/A for CI-only changes.\n\n## Screenshots\nN/A\n"
+    }
+  },
+  {
+    "script": "verification",
+    "name": "missing Verification",
+    "pass": false,
+    "pr": {
+      "body": "## What and why\nCloses #19. Add checks.\n\n## Root cause\nN/A\n\n### Verification\n`./scripts/test.sh` passed. Running app: N/A for CI-only changes.\n\n## Screenshots\nN/A\n"
+    }
+  },
+  {
+    "script": "verification",
+    "name": "comment-only Verification",
+    "pass": false,
+    "pr": {
+      "body": "## What and why\nCloses #19. Add checks.\n\n## Root cause\nN/A\n\n## Verification\n<!-- Fill this in -->\n\n## Screenshots\nN/A\n"
+    }
+  },
+  {
+    "script": "verification",
+    "name": "missing Screenshots",
+    "pass": false,
+    "pr": {
+      "body": "## What and why\nCloses #19. Add checks.\n\n## Root cause\nN/A\n\n## Verification\n`./scripts/test.sh` passed. Running app: N/A for CI-only changes.\n\n### Screenshots\nN/A\n"
+    }
+  },
+  {
+    "script": "verification",
+    "name": "comment-only Screenshots",
+    "pass": false,
+    "pr": {
+      "body": "## What and why\nCloses #19. Add checks.\n\n## Root cause\nN/A\n\n## Verification\n`./scripts/test.sh` passed. Running app: N/A for CI-only changes.\n\n## Screenshots\n<!-- Fill this in -->\n"
+    }
+  },
+  {
+    "script": "verification",
+    "name": "wrong section order",
+    "pass": false,
+    "pr": {
+      "body": "## What and why\nCloses #19. Add checks.\n\n## Screenshots\nN/A\n\n## Verification\n`./scripts/test.sh` passed. Running app: N/A for CI-only changes.\n\n## Root cause\nN/A\n"
+    }
+  },
+  {
+    "script": "verification",
+    "name": "changelog section",
+    "pass": false,
+    "pr": {
+      "body": "## What and why\nCloses #19. Add checks.\n\n## Root cause\nN/A\n\n## Verification\n`./scripts/test.sh` passed. Running app: N/A for CI-only changes.\n\n## Screenshots\nN/A\n\n## Changelog\nExtra\n"
+    }
+  },
+  {
+    "script": "verification",
+    "name": "duplicate section",
+    "pass": false,
+    "pr": {
+      "body": "## What and why\nCloses #19. Add checks.\n\n## Root cause\nN/A\n\n## Verification\n`./scripts/test.sh` passed. Running app: N/A for CI-only changes.\n\n## Screenshots\nN/A\n\n## Verification\nPassed\n"
+    }
+  },
+  {
+    "script": "verification",
+    "name": "headings inside comment",
+    "pass": false,
+    "pr": {
+      "body": "<!--\n## What and why\nCloses #19. Add checks.\n\n## Root cause\nN/A\n\n## Verification\n`./scripts/test.sh` passed. Running app: N/A for CI-only changes.\n\n## Screenshots\nN/A\n\n-->"
+    }
   }
 ]

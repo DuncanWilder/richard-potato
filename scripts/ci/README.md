@@ -8,6 +8,11 @@ an event JSON file, never interpolated into shell commands.
   optional. Allowed types are feat, fix, perf, chore, docs, refactor, test, ci,
   build. A BREAKING CHANGE footer can also document a breaking change.
 - `check-verification.py EVENT`: requires a filled `## Verification` section.
+  It also requires filled `## What and why`, `## Root cause`,
+  `## Verification`, and `## Screenshots` sections, in that order, with no extra
+  second-level sections. Use N/A for non-fixes and non-UI screenshots. Verification
+  must describe commands, results, and the running-app check; perf changes also
+  need the environment, method, and measured before/after table.
 - `check-images.py EVENT`: rejects PR-body Markdown and HTML images unless their
   URLs use `https://github.com/user-attachments/`, including reference images
   and HTML srcset sources. Upload screenshots with

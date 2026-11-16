@@ -1,16 +1,11 @@
-## Summary
-
+## What and why
 <!-- Describe the change and link its issue (Closes #...). -->
 
-## Verification
+## Root cause
+<!-- For fixes: what actually went wrong. Write N/A for non-fixes. -->
 
-<!-- Required: replace this comment with commands run and their results.
-For UI changes, attach screenshots or a recording. Upload screenshots with
-gh pr create/edit --body-file ... --attach <file> (gh 2.99.0+).
-Image URLs must use https://github.com/user-attachments/.
-Never commit or push evidence images to branches or link raw.githubusercontent.com.
-For perf changes, include a measured table such as:
-| Metric | Before | After |
-| --- | --- | --- |
-| Launch latency (ms) | 120 | 95 |
-Include the environment and measurement method. -->
+## Verification
+<!-- Required. Commands run and their results, plus how you checked it in the running app. Tests alone are not enough. For perf changes, include a measured before/after table with the environment and method. -->
+
+## Screenshots
+<!-- Required for UI changes. Upload with gh pr create/edit --attach <file> (gh 2.99.0+) so URLs are https://github.com/user-attachments/. Never commit or push evidence images or link raw.githubusercontent.com or local paths. Write N/A for non-UI changes. -->
