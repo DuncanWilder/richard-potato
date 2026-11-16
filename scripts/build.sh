@@ -24,6 +24,13 @@ fi
 mv -f "$STAGED_BIN" "$APP/Contents/MacOS/RichardPotato"
 cp "$ROOT/Resources/Info.plist" "$APP/Contents/Info.plist"
 
+# Set only the packaged metadata; keep the source version unchanged.
+if [[ -n "${RELEASE_VERSION:-}" ]]; then
+    [[ "$RELEASE_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "Invalid release version" >&2; exit 1; }
+    /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $RELEASE_VERSION" "$APP/Contents/Info.plist"
+    /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $RELEASE_VERSION" "$APP/Contents/Info.plist"
+fi
+
 # iconutil is included with macOS; an asset catalog compiler is not needed.
 ICON_DIR="$(mktemp -d)/AppIcon.iconset"
 mkdir -p "$ICON_DIR"

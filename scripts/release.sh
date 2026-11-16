@@ -9,7 +9,7 @@ DIST_APP="$DIST_DIR/$DISPLAY_NAME.app"
 
 cd "$ROOT"
 
-version="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$ROOT/Resources/Info.plist")"
+version="${RELEASE_VERSION:-$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$ROOT/Resources/Info.plist")}"
 
 ARCHIVE_NAME="Richard-Potato-$version.zip"
 ARCHIVE_PATH="$DIST_DIR/$ARCHIVE_NAME"
@@ -40,4 +40,6 @@ echo "Share the zip. Recipients should unzip, then right-click the app -> Open"
 echo "(needed once because this local certificate is not Apple notarized)."
 echo "Dictation needs Microphone + Accessibility permission on first run."
 
-open "$DIST_DIR"
+if [[ "${RELEASE_NO_OPEN:-false}" != true ]]; then
+  open "$DIST_DIR"
+fi

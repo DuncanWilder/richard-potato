@@ -12,6 +12,7 @@ permissions:
 jobs:
   build:
     name: Build (release)
+    if: github.event_name == 'pull_request'
     runs-on: macos-26
     timeout-minutes: 20
     steps:
@@ -48,3 +49,25 @@ jobs:
       - uses: actions/checkout@v4.4.0
       - name: Check Swift formatting
         run: ./scripts/format.sh
+
+  release-smoke:
+    name: Release script smoke test
+    if: github.event_name == 'pull_request'
+    runs-on: macos-26
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - name: Check out full release history
+        uses: actions/checkout@v4.4.0
+        with:
+          fetch-depth: 0
+      - name: Test release planning fixtures
+        run: python3 scripts/test-release-plan.py
+      - name: Exercise publish planning with system Bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: /bin/bash scripts/github-release.sh --plan-only
+      - name: Build, sign and zip with system Bash
+        run: /bin/bash scripts/github-release.sh --dry-run
