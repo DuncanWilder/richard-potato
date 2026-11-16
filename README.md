@@ -57,7 +57,11 @@ No signing certificate or keychain setup is needed.
 ./scripts/release.sh  # Build an app and zip in dist/
 ```
 
-To publish a release, commit and push your changes, then run `./scripts/github-release.sh`. It asks for release notes and uploads the zip to a GitHub release tagged with the project version.
+Each push to `main` publishes a release on a `macos-26` runner. The release uses the highest reachable version tag, or `CFBundleShortVersionString` if there is no version tag. Conventional commit and PR titles select the bump: breaking changes select major, `feat` selects minor, and all other changes select patch. Release notes use PR titles, with commit subjects for commits without a PR.
+
+Run `/bin/bash scripts/github-release.sh --plan-only` to check the version and notes with GitHub access. Run `/bin/bash scripts/github-release.sh --dry-run` to build, sign and zip without publishing; this mode uses local commit subjects. Both modes run in PR CI with the system Bash. The app build and release smoke test run only on PRs.
+
+The release version is written into the packaged copy of `Resources/Info.plist` before ad hoc signing. The source plist stays unchanged, and no version commit is made. The fixed designated requirement is the same for local and CI builds. Publishing uses `GITHUB_TOKEN`; no signing certificate is required. The release script does not open an editor or Finder.
 
 The build script signs Debug and Release apps ad hoc (`codesign --sign -`) with a fixed designated requirement in `Resources/LocalCodeRequirement.txt`. It keeps the hardened runtime and audio-input entitlement. The requirement uses the bundle ID and requires a bundle version, so it stays the same across rebuilds. It identifies the app, not its author. These builds are not Apple notarized. Recipients may need to right-click the app and select **Open** on first use.
 

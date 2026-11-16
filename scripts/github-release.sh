@@ -3,76 +3,66 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
-
-command -v gh >/dev/null || { echo "Install GitHub CLI (gh) first." >&2; exit 1; }
-
-versions="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' Resources/Info.plist)"
-if [[ ! "$versions" =~ ^[0-9]+\.[0-9]+(\.[0-9]+)?$ ]]; then
-  echo "Expected a numeric CFBundleShortVersionString in Resources/Info.plist." >&2
-  exit 1
-fi
-tag="v$versions"
-
-gh auth status >/dev/null
-repo="$(gh repo view --json nameWithOwner --jq .nameWithOwner)"
-
-github_status() {
-  local response status
-  response="$(gh api -i "repos/$repo/$1" 2>&1)" || true
-  status="$(printf '%s\n' "$response" | sed -nE 's/^HTTP\/[0-9.]+ ([0-9]{3}).*/\1/p' | tail -n 1)"
-  if [[ -z "$status" ]]; then
-    echo "Could not check $1 on GitHub: $response" >&2
-    exit 1
-  fi
-  printf '%s' "$status"
-}
-
-for resource in "git/ref/tags/$tag" "releases/tags/$tag"; do
-  status="$(github_status "$resource")"
-  case "$status" in
-    200) echo "Tag or release $tag already exists on GitHub." >&2; exit 1 ;;
-    404) ;;
-    *) echo "GitHub version check failed (HTTP $status)." >&2; exit 1 ;;
+version="${RELEASE_VERSION:-}"
+notes=""
+dry_run=false
+plan_only=false
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --version) version="$2"; shift 2 ;;
+    --notes-file) notes="$2"; shift 2 ;;
+    --dry-run) dry_run=true; shift ;;
+    --plan-only) plan_only=true; shift ;;
+    *) echo "Usage: $0 [--version X.Y.Z --notes-file FILE] [--dry-run | --plan-only]" >&2; exit 1 ;;
   esac
 done
 
-if [[ -n "$(git status --porcelain)" ]]; then
-  echo "Commit your changes before making a release." >&2
-  exit 1
+# Without explicit inputs, local releases use the same deterministic plan as CI.
+temporary="$(mktemp)"
+trap 'rm -f "$temporary"' EXIT
+# Bash 3.2 with nounset needs the guarded expansion even for a declared array.
+plan_options=()
+if [[ "$dry_run" == true ]]; then
+  plan_options+=(--commit-titles)
 fi
-
-branch="$(git branch --show-current)"
-if [[ -z "$branch" ]]; then
-  echo "Check out a branch before making a release." >&2
-  exit 1
+if [[ -z "$version" ]]; then
+  version="$(python3 scripts/release-plan.py --notes-file "$temporary" ${plan_options[@]+"${plan_options[@]}"})"
 fi
-
+if [[ -z "$notes" ]]; then
+  python3 scripts/release-plan.py --notes-file "$temporary" ${plan_options[@]+"${plan_options[@]}"} >/dev/null
+  notes="$temporary"
+fi
+[[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "Invalid release version" >&2; exit 1; }
+[[ -s "$notes" ]] || { echo "Release notes are empty" >&2; exit 1; }
+if [[ "$plan_only" == true ]]; then
+  printf 'Planned release: v%s\n' "$version"
+  cat "$notes"
+  exit 0
+fi
+tag="v$version"
 commit="$(git rev-parse HEAD)"
-remote_commit="$(git ls-remote origin "refs/heads/$branch" | cut -f1)"
-if [[ "$remote_commit" != "$commit" ]]; then
-  echo "Push the current commit to origin/$branch before making a release." >&2
-  exit 1
+if [[ "$dry_run" == false ]]; then
+  command -v gh >/dev/null
+  [[ -z "$(git status --porcelain)" ]] || { echo "Commit changes before publishing" >&2; exit 1; }
+  # A queued merge can already be behind the remote tip. Verify reachability,
+  # rather than requiring a remote branch to point at this exact commit.
+  git fetch origin
+  remote_refs="$(git ls-remote origin)"
+  if [[ -z "$(git branch -r --contains "$commit")" ]]; then
+    echo "Push the current commit before publishing" >&2; exit 1
+  fi
+  if printf '%s\n' "$remote_refs" | awk '{print $2}' | grep -qx "refs/tags/$tag"; then
+    echo "Tag $tag already exists" >&2; exit 1
+  fi
 fi
 
-notes="$(mktemp)"
-trap 'rm -f "$notes"' EXIT
-echo "Write the changelog for $tag in your editor, then save and close it."
-"${EDITOR:-vi}" "$notes"
-if [[ -z "$(tr -d '[:space:]' < "$notes")" ]]; then
-  echo "The changelog is empty. No release was made." >&2
-  exit 1
+RELEASE_VERSION="$version" RELEASE_NO_OPEN=true ./scripts/release.sh
+archive="$ROOT/dist/Richard-Potato-$version.zip"
+[[ -s "$archive" ]] || { echo "Release archive is missing: $archive" >&2; exit 1; }
+if [[ "$dry_run" == true ]]; then
+  echo "Dry run complete: $tag at $commit (no tag or release published)"
+  exit 0
 fi
-
-echo "Building $tag..."
-./scripts/release.sh
-archive="$ROOT/dist/Richard-Potato-$versions.zip"
-if [[ ! -s "$archive" ]]; then
-  echo "Release archive is missing: $archive" >&2
-  exit 1
-fi
-
-echo "Creating GitHub release $tag..."
-gh release create "$tag" "$archive" \
-  --target "$commit" \
-  --title "Richard Potato $tag" \
-  --notes-file "$notes"
+# gh creates the tag at the exact built commit, without a version commit on main.
+gh release create "$tag" "$archive" --target "$commit" \
+  --title "Richard Potato $tag" --notes-file "$notes"
